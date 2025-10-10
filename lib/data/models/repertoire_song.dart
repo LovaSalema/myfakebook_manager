@@ -36,11 +36,11 @@ class RepertoireSong {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'repertoireId': repertoireId,
-      'songId': songId,
-      'orderIndex': orderIndex,
+      'repertoire_id': repertoireId,
+      'song_id': songId,
+      'order_index': orderIndex,
       'notes': notes,
-      'addedAt': addedAt.millisecondsSinceEpoch,
+      'added_at': addedAt.millisecondsSinceEpoch,
     };
   }
 
@@ -48,11 +48,13 @@ class RepertoireSong {
   factory RepertoireSong.fromMap(Map<String, dynamic> map) {
     return RepertoireSong(
       id: map['id'],
-      repertoireId: map['repertoireId'],
-      songId: map['songId'],
-      orderIndex: map['orderIndex'],
+      repertoireId: map['repertoire_id'] ?? map['repertoireId'],
+      songId: map['song_id'] ?? map['songId'],
+      orderIndex: map['order_index'] ?? map['orderIndex'],
       notes: map['notes'],
-      addedAt: DateTime.fromMillisecondsSinceEpoch(map['addedAt']),
+      addedAt: DateTime.fromMillisecondsSinceEpoch(
+        map['added_at'] ?? map['addedAt'],
+      ),
     );
   }
 

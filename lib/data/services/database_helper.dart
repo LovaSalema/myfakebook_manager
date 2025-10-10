@@ -754,7 +754,9 @@ class DatabaseHelper {
           [repertoireId],
         );
 
-        int nextOrder = (currentMax.first['max_order'] as int? ?? -1) + 1;
+        // Handle case when no songs exist in repertoire (max_order will be null)
+        final maxOrder = currentMax.first['max_order'];
+        int nextOrder = (maxOrder != null ? maxOrder as int : -1) + 1;
 
         // Insert each song
         for (int i = 0; i < songIds.length; i++) {
