@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/song.dart';
+import '../../data/models/section.dart';
+import '../../data/models/measure.dart';
 import '../../data/services/database_helper.dart';
 import '../providers/song_provider.dart';
 import '../providers/theme_provider.dart';
@@ -82,6 +84,34 @@ class _AddSongScreenState extends State<AddSongScreen> {
     try {
       final databaseHelper = DatabaseHelper();
 
+      // Convert local sections to database sections
+      final sections = _sections.asMap().entries.map((entry) {
+        final sectionIndex = entry.key;
+        final section = entry.value;
+        return Section.create(
+          songId: 0, // Will be set after song creation
+          sectionType: 'VERSE',
+          sectionLabel: section.name,
+          sectionName: section.name,
+          sectionOrder: sectionIndex,
+          measureCount: section.measures.length,
+        ).copyWith(
+          measures: section.measures.asMap().entries.map((measureEntry) {
+            final measureIndex = measureEntry.key;
+            final measure = measureEntry.value;
+            return Measure(
+              sectionId: 0, // Will be set after section creation
+              measureOrder: measureIndex,
+              timeSignature: _timeSignatureController.text.trim(),
+              chords: measure.chords,
+              specialSymbol: null,
+              hasFirstEnding: false,
+              hasSecondEnding: false,
+            );
+          }).toList(),
+        );
+      }).toList();
+
       if (widget.song != null) {
         // Update existing song
         final updatedSong = widget.song!.copyWith(
@@ -93,6 +123,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
           style: null,
           notationType: _selectedNotationType,
           updatedAt: DateTime.now(),
+          sections: sections,
         );
 
         if (!updatedSong.validate()) {
@@ -136,7 +167,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
           tempo: int.tryParse(_tempoController.text) ?? 120,
           style: null,
           notationType: _selectedNotationType,
-        );
+        ).copyWith(sections: sections);
 
         if (!song.validate()) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -498,7 +529,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
     );
   }
 
-  /// Build a measure row with chord buttons
+  /// Build a measure row with chord inputs
   Widget _buildMeasureRow(
     int sectionIndex,
     int measureIndex,
@@ -531,28 +562,45 @@ class _AddSongScreenState extends State<AddSongScreen> {
           ),
           const SizedBox(height: 8),
           Row(
-            children: measure.chords.map((chord) {
+            children: measure.chords.asMap().entries.map((chordEntry) {
+              final chordIndex = chordEntry.key;
+              final chord = chordEntry.value;
               return Expanded(
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.outline.withOpacity(0.3),
+                  child: TextField(
+                    controller: TextEditingController(text: chord),
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withOpacity(0.3),
+                        ),
                       ),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Center(
-                      child: Text(
-                        chord,
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          fontWeight: FontWeight.w500,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: BorderSide(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.outline.withOpacity(0.3),
                         ),
                       ),
                     ),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _sections[sectionIndex]
+                                .measures[measureIndex]
+                                .chords[chordIndex] =
+                            value;
+                      });
+                    },
                   ),
                 ),
               );

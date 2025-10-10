@@ -235,8 +235,6 @@ class DatabaseHelper {
           for (final measure in section.measures) {
             final measureWithSectionId = measure.copyWith(sectionId: sectionId);
             final measureMap = measureWithSectionId.toMap();
-            // Convert chords to JSON for storage
-            measureMap['chords_json'] = jsonEncode(measure.chords);
             await txn.insert('measures', measureMap);
           }
         }
@@ -396,7 +394,6 @@ class DatabaseHelper {
 
           for (final measure in section.measures) {
             final measureMap = measure.copyWith(sectionId: sectionId).toMap();
-            measureMap['chords_json'] = jsonEncode(measure.chords);
             await txn.insert('measures', measureMap);
           }
         }

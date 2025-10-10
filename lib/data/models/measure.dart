@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// Represents a single measure in a song section
 class Measure {
   final int? id;
@@ -44,30 +46,30 @@ class Measure {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'sectionId': sectionId,
-      'measureOrder': measureOrder,
-      'timeSignature': timeSignature,
-      'chords': chords.join('|'), // Store chords as pipe-separated string
-      'specialSymbol': specialSymbol,
-      'hasFirstEnding': hasFirstEnding ? 1 : 0,
-      'hasSecondEnding': hasSecondEnding ? 1 : 0,
+      'section_id': sectionId,
+      'measure_order': measureOrder,
+      'time_signature': timeSignature,
+      'chords_json': jsonEncode(chords), // Store chords as JSON
+      'special_symbol': specialSymbol,
+      'has_first_ending': hasFirstEnding ? 1 : 0,
+      'has_second_ending': hasSecondEnding ? 1 : 0,
     };
   }
 
   /// Creates Measure from Map (database result)
   factory Measure.fromMap(Map<String, dynamic> map) {
-    final chordsString = map['chords'] as String? ?? '';
-    final chords = chordsString.split('|');
+    final chordsJson = map['chords_json'] as String? ?? '[]';
+    final chords = (jsonDecode(chordsJson) as List).cast<String>();
 
     return Measure(
       id: map['id'],
-      sectionId: map['sectionId'],
-      measureOrder: map['measureOrder'],
-      timeSignature: map['timeSignature'],
+      sectionId: map['section_id'],
+      measureOrder: map['measure_order'],
+      timeSignature: map['time_signature'],
       chords: chords,
-      specialSymbol: map['specialSymbol'],
-      hasFirstEnding: map['hasFirstEnding'] == 1,
-      hasSecondEnding: map['hasSecondEnding'] == 1,
+      specialSymbol: map['special_symbol'],
+      hasFirstEnding: map['has_first_ending'] == 1,
+      hasSecondEnding: map['has_second_ending'] == 1,
     );
   }
 

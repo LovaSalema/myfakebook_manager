@@ -59,13 +59,13 @@ class Section {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'songId': songId,
-      'sectionType': sectionType,
-      'sectionLabel': sectionLabel,
-      'sectionName': sectionName,
-      'sectionOrder': sectionOrder,
-      'repeatCount': repeatCount,
-      'hasRepeatSign': hasRepeatSign ? 1 : 0,
+      'song_id': songId,
+      'section_type': sectionType,
+      'section_label': sectionLabel,
+      'section_name': sectionName,
+      'section_order': sectionOrder,
+      'repeat_count': repeatCount,
+      'has_repeat_sign': hasRepeatSign ? 1 : 0,
     };
   }
 
@@ -73,14 +73,14 @@ class Section {
   factory Section.fromMap(Map<String, dynamic> map) {
     return Section(
       id: map['id'],
-      songId: map['songId'],
-      sectionType: map['sectionType'],
-      sectionLabel: map['sectionLabel'],
-      sectionName: map['sectionName'],
-      sectionOrder: map['sectionOrder'],
+      songId: map['song_id'],
+      sectionType: map['section_type'],
+      sectionLabel: map['section_label'],
+      sectionName: map['section_name'],
+      sectionOrder: map['section_order'],
       measures: [], // Measures will be loaded separately
-      repeatCount: map['repeatCount'] ?? 1,
-      hasRepeatSign: map['hasRepeatSign'] == 1,
+      repeatCount: map['repeat_count'] ?? 1,
+      hasRepeatSign: map['has_repeat_sign'] == 1,
     );
   }
 
