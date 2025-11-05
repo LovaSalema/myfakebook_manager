@@ -94,7 +94,7 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: double.infinity, // Full width
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(8), // Réduit de 20 à 8
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -102,15 +102,20 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Chord Sheet (WebView)',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[700],
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 4,
+                bottom: 8,
+              ), // Padding minimal pour le titre
+              child: Text(
+                'Chord Sheet (WebView)',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
               ),
             ),
-            const SizedBox(height: 16),
             Container(
               width: double.infinity, // Full width
               height: 500,
@@ -154,7 +159,7 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
           Text(
             'Erreur de chargement',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Colors.grey[600],
             ),
