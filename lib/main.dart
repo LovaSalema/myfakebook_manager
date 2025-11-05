@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // Core imports
 import 'core/theme/app_theme.dart';
@@ -47,13 +48,21 @@ class MyFakeBookApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    return MaterialApp(
-      title: AppConstants.appName,
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeProvider.themeMode,
-      home: const SplashScreen(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 800),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (_, child) {
+        return MaterialApp(
+          title: AppConstants.appName,
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeProvider.themeMode,
+          home: child,
+        );
+      },
+      child: const SplashScreen(),
     );
   }
 }
@@ -111,24 +120,24 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             // App logo/icon
             Container(
-                  width: 120,
-                  height: 120,
+                  width: 120.w,
+                  height: 120.h,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(24.r),
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(
                           context,
                         ).colorScheme.shadow.withOpacity(0.2),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                        blurRadius: 20.r,
+                        offset: Offset(0, 10.h),
                       ),
                     ],
                   ),
                   child: Icon(
                     Icons.music_note,
-                    size: 60,
+                    size: 60.sp,
                     color: Color(AppColors.primary),
                   ),
                 )
@@ -137,7 +146,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 .then(delay: 200.ms)
                 .shake(duration: 600.ms),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
 
             // App name
             Text(
@@ -150,7 +159,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.3, end: 0),
 
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
 
             // App description
             Text(
@@ -163,15 +172,15 @@ class _SplashScreenState extends State<SplashScreen> {
               textAlign: TextAlign.center,
             ).animate().fadeIn(duration: 800.ms).slideY(begin: 0.2, end: 0),
 
-            const SizedBox(height: 48),
+            SizedBox(height: 48.h),
 
             // Loading indicator
             Container(
-                  width: 40,
-                  height: 40,
-                  padding: const EdgeInsets.all(8),
+                  width: 40.w,
+                  height: 40.h,
+                  padding: EdgeInsets.all(8.r),
                   child: CircularProgressIndicator(
-                    strokeWidth: 3,
+                    strokeWidth: 3.w,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       Colors.white.withOpacity(0.8),
                     ),
@@ -180,7 +189,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 .animate(onPlay: (controller) => controller.repeat())
                 .rotate(duration: 1500.ms),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Loading text
             Text(
@@ -213,12 +222,12 @@ class ErrorScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(32.0),
+          padding: EdgeInsets.all(32.r),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.error_outline, size: 80, color: Colors.red.shade400),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               Text(
                 'Oops! Something went wrong',
                 style: GoogleFonts.roboto(
@@ -228,7 +237,7 @@ class ErrorScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 error,
                 style: GoogleFonts.roboto(
@@ -240,7 +249,7 @@ class ErrorScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
@@ -248,16 +257,16 @@ class ErrorScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(AppColors.primary),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 12.h,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               TextButton(
                 onPressed: () {
                   // TODO: Show app info or contact support

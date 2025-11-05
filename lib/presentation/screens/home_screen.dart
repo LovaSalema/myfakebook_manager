@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
@@ -164,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(72),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: _buildSearchBar(context),
         ),
       ),
@@ -177,25 +178,25 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = themeProvider.isDarkMode;
 
     return Container(
-      height: 48,
+      height: 48.h,
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
-          width: 1.0,
+          width: 1.0.w,
         ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Icon(
             Icons.search,
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-            size: 20,
+            size: 20.sp,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: TextField(
               controller: _searchController,
@@ -217,14 +218,14 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (_searchController.text.isNotEmpty)
             Container(
-              margin: const EdgeInsets.only(right: 8),
+              margin: EdgeInsets.only(right: 8.w),
               child: IconButton(
                 icon: Icon(
                   Icons.clear,
                   color: Theme.of(
                     context,
                   ).colorScheme.onSurface.withOpacity(0.6),
-                  size: 20,
+                  size: 20.sp,
                 ),
                 onPressed: () {
                   _searchController.clear();
@@ -249,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   snapshot.data ?? {'songCount': 0, 'favoriteCount': 0};
 
               return Padding(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
                 child: Row(
                   children: [
                     _StatCard(
@@ -260,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       onTap: _showSongsView,
                       isActive: _currentView == 0,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     _StatCard(
                       title: 'Répertoires',
                       value: repertoireProvider.repertoireCount.toString(),
@@ -358,46 +359,46 @@ class _HomeScreenState extends State<HomeScreen> {
           baseColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
           highlightColor: isDark ? Colors.grey.shade500 : Colors.grey.shade100,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: isDark ? Color(AppColors.surfaceDark) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 16,
+                        height: 16.h,
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.grey.shade600
                               : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Container(
-                        width: 120,
-                        height: 14,
+                        width: 120.w,
+                        height: 14.h,
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.grey.shade600
                               : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
                     ],
@@ -416,16 +417,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return SliverFillRemaining(
       hasScrollBody: false,
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.r),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               Icons.library_music_outlined,
-              size: 80,
+              size: 80.sp,
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             Text(
               'Aucun répertoire',
               style: AppTextStyles.headlineSmall.copyWith(
@@ -433,7 +434,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               'Créez votre premier répertoire',
               style: AppTextStyles.bodyMedium.copyWith(
@@ -441,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             FilledButton(
               onPressed: _createNewRepertoire,
               child: const Text('Créer un répertoire'),
@@ -458,11 +459,11 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: SizedBox(
-          height: 40,
+          height: 40.h,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: _keyFilters.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 8),
+            separatorBuilder: (context, index) => SizedBox(width: 8.w),
             itemBuilder: (context, index) {
               final filter = _keyFilters[index];
               final isSelected = _selectedFilter == filter;
@@ -475,10 +476,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (isFavorite)
                       Icon(
                         Icons.favorite,
-                        size: 16,
+                        size: 16.sp,
                         color: isSelected ? Colors.white : Colors.red,
                       ),
-                    if (isFavorite) const SizedBox(width: 4),
+                    if (isFavorite) SizedBox(width: 4.w),
                     Text(filter),
                   ],
                 ),
@@ -498,7 +499,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 checkmarkColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
               );
             },
@@ -547,18 +548,18 @@ class _HomeScreenState extends State<HomeScreen> {
         return SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
-            padding: const EdgeInsets.all(32),
+            padding: EdgeInsets.all(32.r),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   Icons.music_note_outlined,
-                  size: 80,
+                  size: 80.sp,
                   color: Theme.of(
                     context,
                   ).colorScheme.onSurface.withOpacity(0.3),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 Text(
                   'Aucune chanson',
                   style: AppTextStyles.headlineSmall.copyWith(
@@ -568,7 +569,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Créez votre première grille d\'accords',
                   style: AppTextStyles.bodyMedium.copyWith(
@@ -578,7 +579,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 FilledButton(
                   onPressed: _createNewSong,
                   child: const Text('Commencer'),
@@ -605,46 +606,46 @@ class _HomeScreenState extends State<HomeScreen> {
           baseColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
           highlightColor: isDark ? Colors.grey.shade500 : Colors.grey.shade100,
           child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            padding: EdgeInsets.all(16.r),
             decoration: BoxDecoration(
               color: isDark ? Color(AppColors.surfaceDark) : Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 16,
+                        height: 16.h,
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.grey.shade600
                               : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Container(
-                        width: 120,
-                        height: 14,
+                        width: 120.w,
+                        height: 14.h,
                         decoration: BoxDecoration(
                           color: isDark
                               ? Colors.grey.shade600
                               : Colors.grey.shade400,
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                       ),
                     ],
@@ -664,8 +665,8 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         // Bouton principal qui change selon la vue active
         Positioned(
-          bottom: 16,
-          right: 16,
+          bottom: 16.h,
+          right: 16.w,
           child: FloatingActionButton(
             onPressed: _currentView == 0
                 ? _createNewSong
@@ -909,14 +910,14 @@ class _StatCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: isActive
                 ? Border.all(
                     color: Theme.of(context).colorScheme.primary,
-                    width: 2,
+                    width: 2.w,
                   )
                 : null,
             boxShadow: [
@@ -924,25 +925,25 @@ class _StatCard extends StatelessWidget {
                 color: Theme.of(
                   context,
                 ).colorScheme.shadow.withOpacity(isActive ? 0.1 : 0.05),
-                blurRadius: isActive ? 12 : 8,
-                offset: const Offset(0, 2),
+                blurRadius: isActive ? 12.r : 8.r,
+                offset: Offset(0, 2.h),
               ),
             ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: isActive ? 28 : 24),
-              const SizedBox(height: 8),
+              Icon(icon, color: color, size: isActive ? 28.sp : 24.sp),
+              SizedBox(height: 8.h),
               Text(
                 value,
                 style: AppTextStyles.titleLarge.copyWith(
                   fontWeight: FontWeight.w600,
                   color: color,
-                  fontSize: isActive ? 20 : 18,
+                  fontSize: isActive ? 20.sp : 18.sp,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 title,
                 style: AppTextStyles.labelSmall.copyWith(
@@ -976,19 +977,19 @@ class _SongCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       child: Card(
         elevation: 1,
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: _getSongColor(song.title),
                     shape: BoxShape.circle,
@@ -1003,7 +1004,7 @@ class _SongCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1016,7 +1017,7 @@ class _SongCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Row(
                         children: [
                           Text(
@@ -1028,17 +1029,17 @@ class _SongCard extends StatelessWidget {
                             ),
                           ),
                           if (song.key.isNotEmpty) ...[
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
                               ),
                               decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
                                 ).colorScheme.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
+                                borderRadius: BorderRadius.circular(4.r),
                               ),
                               child: Text(
                                 song.key,
@@ -1058,8 +1059,8 @@ class _SongCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (song.isFavorite)
-                      Icon(Icons.favorite, color: Colors.red, size: 20),
-                    const SizedBox(height: 4),
+                      Icon(Icons.favorite, color: Colors.red, size: 20.sp),
+                    SizedBox(height: 4.h),
                     // Repertoire badge would go here
                   ],
                 ),
@@ -1100,19 +1101,19 @@ class _RepertoireCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
       child: Card(
         elevation: 1,
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: _getRepertoireColor(repertoire.name),
                     shape: BoxShape.circle,
@@ -1129,7 +1130,7 @@ class _RepertoireCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1142,7 +1143,7 @@ class _RepertoireCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Row(
                         children: [
                           if (repertoire.eventDate != null) ...[
@@ -1154,19 +1155,7 @@ class _RepertoireCard extends StatelessWidget {
                                 ).colorScheme.onSurface.withOpacity(0.7),
                               ),
                             ),
-                            const SizedBox(width: 8),
-                          ],
-                          if (repertoire.description?.isNotEmpty == true) ...[
-                            Text(
-                              '• ${repertoire.description!}',
-                              style: AppTextStyles.bodyMedium.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
+                            SizedBox(width: 8.w),
                           ],
                         ],
                       ),

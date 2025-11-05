@@ -114,15 +114,12 @@ class _AddSongScreenState extends State<AddSongScreen> {
     try {
       final databaseHelper = DatabaseHelper();
 
-      // Convert local sections to database sections with robust error handling
-      final sections = _convertSectionsToDatabaseFormat();
-
       if (widget.song != null) {
         // Update existing song with data integrity checks
-        await _updateExistingSong(databaseHelper, sections);
+        await _updateExistingSong(databaseHelper);
       } else {
         // Create new song with validation
-        await _createNewSong(databaseHelper, sections);
+        await _createNewSong(databaseHelper);
       }
     } catch (e) {
       _handleSaveError(e);
@@ -185,7 +182,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
   }
 
   /// Convert local sections to database format with error handling
-  List<Section> _convertSectionsToDatabaseFormat() {
+  List<Section> _convertSectionsToDatabaseFormat({int? songId}) {
     try {
       return _sections.asMap().entries.map((entry) {
         final sectionIndex = entry.key;
@@ -219,7 +216,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
         // Create section with proper measures
         return Section(
           id: null, // Will be set by database
-          songId: 0, // Will be set after song creation
+          songId: songId ?? 0, // Use provided songId or 0 for new songs
           sectionType: section.sectionType,
           sectionLabel: section.name,
           sectionName: section.name,
@@ -235,10 +232,10 @@ class _AddSongScreenState extends State<AddSongScreen> {
   }
 
   /// Update existing song with transaction safety
-  Future<void> _updateExistingSong(
-    DatabaseHelper databaseHelper,
-    List<Section> sections,
-  ) async {
+  Future<void> _updateExistingSong(DatabaseHelper databaseHelper) async {
+    // Convert sections with the actual song ID
+    final sections = _convertSectionsToDatabaseFormat(songId: widget.song!.id);
+
     final updatedSong = widget.song!.copyWith(
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
@@ -284,10 +281,10 @@ class _AddSongScreenState extends State<AddSongScreen> {
   }
 
   /// Create new song with validation
-  Future<void> _createNewSong(
-    DatabaseHelper databaseHelper,
-    List<Section> sections,
-  ) async {
+  Future<void> _createNewSong(DatabaseHelper databaseHelper) async {
+    // Convert sections with songId=0 for new song
+    final sections = _convertSectionsToDatabaseFormat();
+
     final song = Song.create(
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
