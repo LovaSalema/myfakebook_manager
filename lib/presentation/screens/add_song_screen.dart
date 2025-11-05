@@ -102,6 +102,11 @@ class _AddSongScreenState extends State<AddSongScreen> {
       return;
     }
 
+    // Validate song structure before saving
+    if (!_validateSongStructure()) {
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
@@ -109,135 +114,242 @@ class _AddSongScreenState extends State<AddSongScreen> {
     try {
       final databaseHelper = DatabaseHelper();
 
-      // Convert local sections to database sections
-      final sections = _sections.asMap().entries.map((entry) {
-        final sectionIndex = entry.key;
-        final section = entry.value;
-        return Section.create(
-          songId: 0, // Will be set after song creation
-          sectionType: section.sectionType, // Use the preserved section type
-          sectionLabel: section.name,
-          sectionName: section.name,
-          sectionOrder: sectionIndex,
-          measureCount: section.measures.length,
-        ).copyWith(
-          measures: section.measures.asMap().entries.map((measureEntry) {
-            final measureIndex = measureEntry.key;
-            final measure = measureEntry.value;
-            return Measure(
-              sectionId: 0, // Will be set after section creation
-              measureOrder: measureIndex,
-              timeSignature: _timeSignatureController.text.trim(),
-              chords: measure.chords,
-              specialSymbol: null,
-              hasFirstEnding: false,
-              hasSecondEnding: false,
-            );
-          }).toList(),
-        );
-      }).toList();
+      // Convert local sections to database sections with robust error handling
+      final sections = _convertSectionsToDatabaseFormat();
 
       if (widget.song != null) {
-        // Update existing song
-        final updatedSong = widget.song!.copyWith(
-          title: _titleController.text.trim(),
-          artist: _artistController.text.trim(),
-          key: _keyController.text.trim(),
-          timeSignature: _timeSignatureController.text.trim(),
-          tempo: int.tryParse(_tempoController.text) ?? 120,
-          style: null,
-          notationType: _selectedNotationType,
-          updatedAt: DateTime.now(),
-          sections: sections,
-        );
-
-        if (!updatedSong.validate()) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('❌ Données de chanson invalides'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-
-        final rowsAffected = await databaseHelper.updateSong(updatedSong);
-
-        if (rowsAffected > 0) {
-          final songProvider = Provider.of<SongProvider>(
-            context,
-            listen: false,
-          );
-          await songProvider.loadSongs();
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('✅ Chanson modifiée avec succès'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.of(context).pop();
-          }
-        } else {
-          throw Exception('Failed to update song in database');
-        }
+        // Update existing song with data integrity checks
+        await _updateExistingSong(databaseHelper, sections);
       } else {
-        // Create new song
-        final song = Song.create(
-          title: _titleController.text.trim(),
-          artist: _artistController.text.trim(),
-          key: _keyController.text.trim(),
-          timeSignature: _timeSignatureController.text.trim(),
-          tempo: int.tryParse(_tempoController.text) ?? 120,
-          style: null,
-          notationType: _selectedNotationType,
-        ).copyWith(sections: sections);
-
-        if (!song.validate()) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('❌ Données de chanson invalides'),
-              backgroundColor: Colors.red,
-            ),
-          );
-          return;
-        }
-
-        final songId = await databaseHelper.insertSong(song);
-
-        if (songId != null) {
-          final songProvider = Provider.of<SongProvider>(
-            context,
-            listen: false,
-          );
-          await songProvider.loadSongs();
-
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('✅ Chanson créée avec succès'),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Navigator.of(context).pop();
-          }
-        } else {
-          throw Exception('Failed to save song to database');
-        }
+        // Create new song with validation
+        await _createNewSong(databaseHelper, sections);
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ Erreur: $e'), backgroundColor: Colors.red),
-        );
-      }
+      _handleSaveError(e);
     } finally {
       if (mounted) {
         setState(() {
           _isSaving = false;
         });
       }
+    }
+  }
+
+  /// Validate song structure before saving
+  bool _validateSongStructure() {
+    // Ensure at least one section exists
+    if (_sections.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ La chanson doit avoir au moins une section'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return false;
+    }
+
+    // Ensure each section has at least one measure
+    for (int i = 0; i < _sections.length; i++) {
+      final section = _sections[i];
+      if (section.measures.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '❌ La section ${section.name} doit avoir au moins une mesure',
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return false;
+      }
+
+      // Validate each measure has valid chords
+      for (int j = 0; j < section.measures.length; j++) {
+        final measure = section.measures[j];
+        if (measure.chords.isEmpty ||
+            measure.chords.every((chord) => chord.trim().isEmpty)) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                '❌ La mesure ${j + 1} de la section ${section.name} doit contenir au moins un accord valide',
+              ),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  /// Convert local sections to database format with error handling
+  List<Section> _convertSectionsToDatabaseFormat() {
+    try {
+      return _sections.asMap().entries.map((entry) {
+        final sectionIndex = entry.key;
+        final section = entry.value;
+
+        // Create measures with actual chord data from local model
+        final measures = section.measures.asMap().entries.map((measureEntry) {
+          final measureIndex = measureEntry.key;
+          final measure = measureEntry.value;
+
+          // Ensure chords are not null and handle empty chords
+          final chords = measure.chords
+              .where((chord) => chord.trim().isNotEmpty)
+              .toList();
+          if (chords.isEmpty) {
+            chords.add(''); // Ensure at least one chord slot exists
+          }
+
+          return Measure(
+            id: null, // Will be set by database
+            sectionId: 0, // Will be set after section creation
+            measureOrder: measureIndex,
+            timeSignature: _timeSignatureController.text.trim(),
+            chords: chords,
+            specialSymbol: null,
+            hasFirstEnding: false,
+            hasSecondEnding: false,
+          );
+        }).toList();
+
+        // Create section with proper measures
+        return Section(
+          id: null, // Will be set by database
+          songId: 0, // Will be set after song creation
+          sectionType: section.sectionType,
+          sectionLabel: section.name,
+          sectionName: section.name,
+          sectionOrder: sectionIndex,
+          measures: measures,
+          repeatCount: 1,
+          hasRepeatSign: false,
+        );
+      }).toList();
+    } catch (e) {
+      throw Exception('Erreur lors de la conversion des sections: $e');
+    }
+  }
+
+  /// Update existing song with transaction safety
+  Future<void> _updateExistingSong(
+    DatabaseHelper databaseHelper,
+    List<Section> sections,
+  ) async {
+    final updatedSong = widget.song!.copyWith(
+      title: _titleController.text.trim(),
+      artist: _artistController.text.trim(),
+      key: _keyController.text.trim(),
+      timeSignature: _timeSignatureController.text.trim(),
+      tempo: int.tryParse(_tempoController.text) ?? 120,
+      style: null,
+      notationType: _selectedNotationType,
+      updatedAt: DateTime.now(),
+      sections: sections,
+    );
+
+    if (!updatedSong.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Données de chanson invalides'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final rowsAffected = await databaseHelper.updateSong(updatedSong);
+
+    if (rowsAffected > 0) {
+      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      await songProvider.loadSongs();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Chanson modifiée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } else {
+      throw Exception(
+        'Échec de la mise à jour de la chanson dans la base de données',
+      );
+    }
+  }
+
+  /// Create new song with validation
+  Future<void> _createNewSong(
+    DatabaseHelper databaseHelper,
+    List<Section> sections,
+  ) async {
+    final song = Song.create(
+      title: _titleController.text.trim(),
+      artist: _artistController.text.trim(),
+      key: _keyController.text.trim(),
+      timeSignature: _timeSignatureController.text.trim(),
+      tempo: int.tryParse(_tempoController.text) ?? 120,
+      style: null,
+      notationType: _selectedNotationType,
+    ).copyWith(sections: sections);
+
+    if (!song.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('❌ Données de chanson invalides'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final songId = await databaseHelper.insertSong(song);
+
+    if (songId != null) {
+      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      await songProvider.loadSongs();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✅ Chanson créée avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.of(context).pop();
+      }
+    } else {
+      throw Exception(
+        'Échec de la sauvegarde de la chanson dans la base de données',
+      );
+    }
+  }
+
+  /// Handle save errors with user-friendly messages
+  void _handleSaveError(dynamic error) {
+    if (mounted) {
+      String errorMessage = 'Erreur inconnue';
+
+      if (error is DatabaseException) {
+        errorMessage = 'Erreur de base de données: ${error.message}';
+      } else if (error is Exception) {
+        errorMessage = 'Erreur: ${error.toString()}';
+      } else if (error is String) {
+        errorMessage = error;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('❌ $errorMessage'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 

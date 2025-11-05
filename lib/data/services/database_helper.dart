@@ -388,9 +388,14 @@ class DatabaseHelper {
           whereArgs: [song.id],
         );
 
-        // Insert updated sections and measures
+        // Insert updated sections and measures with correct song ID
         for (final section in song.sections) {
-          final sectionId = await txn.insert('sections', section.toMap());
+          // Ensure section has the correct song ID
+          final sectionWithCorrectSongId = section.copyWith(songId: song.id!);
+          final sectionId = await txn.insert(
+            'sections',
+            sectionWithCorrectSongId.toMap(),
+          );
 
           for (final measure in section.measures) {
             final measureMap = measure.copyWith(sectionId: sectionId).toMap();
