@@ -24,9 +24,15 @@ class SettingsScreen extends StatelessWidget {
             : Color(AppColors.backgroundLight),
         elevation: 2,
         shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.1),
-        title: const Text('Paramètres'),
+        title: Text(
+          'Paramètres',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),

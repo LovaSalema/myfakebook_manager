@@ -11,7 +11,6 @@ class AppTextStyles {
       fontSize: 32,
       fontWeight: FontWeight.w700,
       height: 1.2,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -20,7 +19,6 @@ class AppTextStyles {
       fontSize: 24,
       fontWeight: FontWeight.w600,
       height: 1.3,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -29,7 +27,6 @@ class AppTextStyles {
       fontSize: 20,
       fontWeight: FontWeight.w600,
       height: 1.4,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -39,7 +36,6 @@ class AppTextStyles {
       fontSize: 16,
       fontWeight: FontWeight.w400,
       height: 1.5,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -48,7 +44,6 @@ class AppTextStyles {
       fontSize: 14,
       fontWeight: FontWeight.w400,
       height: 1.5,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -57,7 +52,6 @@ class AppTextStyles {
       fontSize: 12,
       fontWeight: FontWeight.w400,
       height: 1.5,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -95,7 +89,6 @@ class AppTextStyles {
       fontSize: 12,
       fontWeight: FontWeight.w400,
       height: 1.5,
-      color: Color(AppColors.textSecondary),
     );
   }
 
@@ -104,7 +97,6 @@ class AppTextStyles {
       fontSize: 14,
       fontWeight: FontWeight.w500,
       height: 1.5,
-      color: Color(AppColors.textSecondary),
     );
   }
 
@@ -114,7 +106,6 @@ class AppTextStyles {
       fontWeight: FontWeight.w500,
       height: 1.5,
       letterSpacing: 1.5,
-      color: Color(AppColors.textSecondary),
     );
   }
 
@@ -124,7 +115,6 @@ class AppTextStyles {
       fontSize: 18,
       fontWeight: FontWeight.w600,
       height: 1.2,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -133,7 +123,6 @@ class AppTextStyles {
       fontSize: 14,
       fontWeight: FontWeight.w500,
       height: 1.2,
-      color: Color(AppColors.onBackgroundLight),
     );
   }
 
@@ -151,7 +140,6 @@ class AppTextStyles {
       fontSize: 12,
       fontWeight: FontWeight.w500,
       height: 1.2,
-      color: Color(AppColors.textSecondary),
     );
   }
 
@@ -160,35 +148,6 @@ class AppTextStyles {
       fontSize: 16,
       fontWeight: FontWeight.w400,
       height: 1.2,
-      color: Color(AppColors.onBackgroundLight),
-    );
-  }
-
-  // Dark theme variants
-  static TextStyle get headline1Dark {
-    return GoogleFonts.inter(
-      fontSize: 32,
-      fontWeight: FontWeight.w700,
-      height: 1.2,
-      color: Color(AppColors.onBackgroundDark),
-    );
-  }
-
-  static TextStyle get body1Dark {
-    return GoogleFonts.inter(
-      fontSize: 16,
-      fontWeight: FontWeight.w400,
-      height: 1.5,
-      color: Color(AppColors.onBackgroundDark),
-    );
-  }
-
-  static TextStyle get chordTextDark {
-    return GoogleFonts.jetBrainsMono(
-      fontSize: 18,
-      fontWeight: FontWeight.w600,
-      height: 1.2,
-      color: Color(AppColors.onBackgroundDark),
     );
   }
 
@@ -238,45 +197,4 @@ class AppTextStyles {
   static TextStyle get labelSmall => caption;
   static TextStyle get sectionHeader => sectionTitle;
   static TextStyle get measureNumber => measureLabel;
-
-  // Theme-aware text styles
-  static TextStyle headline1Theme(BuildContext context) {
-    return headline1.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle headline2Theme(BuildContext context) {
-    return headline2.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle headline3Theme(BuildContext context) {
-    return headline3.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle body1Theme(BuildContext context) {
-    return body1.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle body2Theme(BuildContext context) {
-    return body2.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle body3Theme(BuildContext context) {
-    return body3.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle chordTextTheme(BuildContext context) {
-    return chordText.copyWith(color: Theme.of(context).colorScheme.onSurface);
-  }
-
-  static TextStyle chordTextSmallTheme(BuildContext context) {
-    return chordTextSmall.copyWith(
-      color: Theme.of(context).colorScheme.onSurface,
-    );
-  }
-
-  static TextStyle musicalSymbolTheme(BuildContext context) {
-    return musicalSymbol.copyWith(
-      color: Theme.of(context).colorScheme.onSurface,
-    );
-  }
 }

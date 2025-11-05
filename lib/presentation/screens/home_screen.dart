@@ -134,19 +134,32 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 12),
           Text(
             'Chord Charts',
-            style: AppTextStyles.headlineSmall.copyWith(
-              fontWeight: FontWeight.w600,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.filter_list),
+          icon: Icon(
+            Icons.filter_list,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           onPressed: _showFilterOptions,
         ),
-        IconButton(icon: const Icon(Icons.sort), onPressed: _showSortOptions),
-        IconButton(icon: const Icon(Icons.settings), onPressed: _showSettings),
+        IconButton(
+          icon: Icon(Icons.sort, color: Theme.of(context).colorScheme.primary),
+          onPressed: _showSortOptions,
+        ),
+        IconButton(
+          icon: Icon(
+            Icons.settings,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          onPressed: _showSettings,
+        ),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(72),

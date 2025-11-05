@@ -33,9 +33,9 @@ class AppColors {
   static const onPrimary = 0xFFFFFFFF;
   static const onSecondary = 0xFFFFFFFF;
   static const onBackgroundLight = 0xFF0F172A;
-  static const onBackgroundDark = 0xFFF1F5F9;
+  static const onBackgroundDark = 0xFFFFFFFF;
   static const onSurfaceLight = 0xFF1E293B;
-  static const onSurfaceDark = 0xFFE2E8F0;
+  static const onSurfaceDark = 0xFFFFFFFF;
   static const onError = 0xFFFFFFFF;
 
   // Music section colors - Subtle and distinctive palette

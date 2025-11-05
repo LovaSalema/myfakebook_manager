@@ -107,14 +107,14 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
                 left: 4,
                 bottom: 8,
               ), // Padding minimal pour le titre
-              child: Text(
-                'Chord Sheet (WebView)',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-              ),
+              // child: Text(
+              // 'Chord Sheet (WebView)',
+              // style: TextStyle(
+              //   fontSize: 14,
+              //   fontWeight: FontWeight.bold,
+              //   color: Colors.grey[700],
+              // ),
+              // ),
             ),
             Container(
               width: double.infinity, // Full width
