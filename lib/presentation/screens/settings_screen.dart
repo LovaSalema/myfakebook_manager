@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../providers/theme_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -37,54 +38,90 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Theme Section
-              _buildThemeSection(context, themeProvider),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isLandscape = constraints.maxWidth > constraints.maxHeight;
 
-              const SizedBox(height: 24),
+            return SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.all(16.r),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Theme Section
+                    _buildThemeSection(context, themeProvider, isLandscape),
 
-              // App Information Section
-              _buildAppInfoSection(context),
-            ],
-          ),
+                    SizedBox(height: 24.h),
+
+                    // App Information Section
+                    _buildAppInfoSection(context, isLandscape),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
     );
   }
 
   /// Build theme section with dark/light mode toggle
-  Widget _buildThemeSection(BuildContext context, ThemeProvider themeProvider) {
+  Widget _buildThemeSection(
+    BuildContext context,
+    ThemeProvider themeProvider,
+    bool isLandscape,
+  ) {
     return Card(
       elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.palette,
-                  size: 24,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  'Thème',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    fontWeight: FontWeight.w600,
+        padding: EdgeInsets.all(16.r),
+        child: isLandscape
+            ? Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.palette,
+                          size: 24.sp,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        SizedBox(width: 12.w),
+                        Text(
+                          'Thème',
+                          style: AppTextStyles.titleMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _buildThemeToggle(context, themeProvider),
-          ],
-        ),
+                  Expanded(child: _buildThemeToggle(context, themeProvider)),
+                ],
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.palette,
+                        size: 24.sp,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Thème',
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.h),
+                  _buildThemeToggle(context, themeProvider),
+                ],
+              ),
       ),
     );
   }
@@ -122,11 +159,11 @@ class SettingsScreen extends StatelessWidget {
   }
 
   /// Build app information section
-  Widget _buildAppInfoSection(BuildContext context) {
+  Widget _buildAppInfoSection(BuildContext context, bool isLandscape) {
     return Card(
       elevation: 1,
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -134,10 +171,10 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Icon(
                   Icons.info,
-                  size: 24,
+                  size: 24.sp,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Text(
                   'Informations',
                   style: AppTextStyles.titleMedium.copyWith(
@@ -146,21 +183,48 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            _buildInfoItem(
-              context: context,
-              title: 'Version',
-              value: '1.0.0',
-              icon: Icons.apps,
-            ),
-            const SizedBox(height: 12),
-            _buildInfoItem(
-              context: context,
-              title: 'Développeur',
-              value: 'MyFakeBook Team',
-              icon: Icons.code,
-            ),
-            const SizedBox(height: 12),
+            SizedBox(height: 16.h),
+            if (isLandscape)
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem(
+                      context: context,
+                      title: 'Version',
+                      value: '1.0.0',
+                      icon: Icons.apps,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: _buildInfoItem(
+                      context: context,
+                      title: 'Développeur',
+                      value: 'MyFakeBook Team',
+                      icon: Icons.code,
+                    ),
+                  ),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  _buildInfoItem(
+                    context: context,
+                    title: 'Version',
+                    value: '1.0.0',
+                    icon: Icons.apps,
+                  ),
+                  SizedBox(height: 12.h),
+                  _buildInfoItem(
+                    context: context,
+                    title: 'Développeur',
+                    value: 'MyFakeBook Team',
+                    icon: Icons.code,
+                  ),
+                ],
+              ),
+            SizedBox(height: 12.h),
             _buildInfoItem(
               context: context,
               title: 'Contact',
@@ -181,19 +245,19 @@ class SettingsScreen extends StatelessWidget {
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(12.0),
+      padding: EdgeInsets.all(12.r),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         children: [
           Icon(
             icon,
-            size: 20,
+            size: 20.sp,
             color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +270,7 @@ class SettingsScreen extends StatelessWidget {
                     ).colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   value,
                   style: AppTextStyles.bodyMedium.copyWith(
