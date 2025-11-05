@@ -96,21 +96,21 @@ class HtmlChordSheetService {
         
         .chord-block {
             display: flex;
+            flex-direction: row;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 12px 0;
+            padding: 12px 8px;
             border-right: 2px solid #000;
-            min-height: 40px;
-            font-size: 24px;
+            min-height: 60px;
+            font-size: 14px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
+            gap: 2px;
         }
         
         .chord-block:nth-child(4n) {
-                border-right: 2px solid #000;
+            border-right: 2px solid #000;
         }
         
         .chord-line::before {
@@ -163,6 +163,12 @@ class HtmlChordSheetService {
             content: '𝄑';
             display: inline-block;
             margin-left: 10px;
+        }
+
+        /* Individual chord styling */
+        .chord {
+            line-height: 1.3;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -226,12 +232,19 @@ class HtmlChordSheetService {
     sectionHtml.write('<div class="section-group">');
 
     for (final measure in section.measures) {
-      final chordText =
-          measure.chords.isNotEmpty && measure.chords[0].isNotEmpty
-          ? measure.chords[0]
-          : '';
+      // Get all non-empty chords
+      final validChords = measure.chords
+          .where((chord) => chord.isNotEmpty)
+          .toList();
 
-      sectionHtml.write('<div class="chord-block">$chordText</div>');
+      // Build chord block with each chord on a separate line
+      sectionHtml.write('<div class="chord-block">');
+      if (validChords.isNotEmpty) {
+        for (final chord in validChords) {
+          sectionHtml.write('<div class="chord">$chord</div>');
+        }
+      }
+      sectionHtml.write('</div>');
     }
 
     sectionHtml.write('</div>');
