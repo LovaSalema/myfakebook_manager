@@ -64,6 +64,9 @@ dependencies:
   # System permissions
   permission_handler: ^11.0.0
 
+  # WebView for chord sheet display
+  webview_flutter: ^4.4.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

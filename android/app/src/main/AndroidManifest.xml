@@ -2,6 +2,8 @@
     <!-- Permissions for file storage and sharing -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <!-- Internet permission for WebView -->
+    <uses-permission android:name="android.permission.INTERNET" />
     
     <application
         android:label="MyFakeBook Manager"

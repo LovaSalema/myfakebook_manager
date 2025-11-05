@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../data/models/song.dart';
 import '../../data/models/section.dart';
 import '../../data/models/measure.dart';
@@ -11,16 +12,18 @@ import '../providers/export_provider.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_helper.dart';
+import '../widgets/chord_grid/chord_sheet_template.dart';
+import '../widgets/chord_grid/chord_sheet_webview.dart';
 import 'add_song_screen.dart';
 
 /// Enhanced Chord Sheet with CustomPaint for precise grid rendering
-class ChordSheetTemplate extends StatelessWidget {
+class CustomChordSheetTemplate extends StatelessWidget {
   final Song song;
   final double fontSize;
   final bool showBarLines;
   final int measuresPerLine;
 
-  const ChordSheetTemplate({
+  const CustomChordSheetTemplate({
     super.key,
     required this.song,
     this.fontSize = 14,
@@ -30,6 +33,9 @@ class ChordSheetTemplate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(
+      'DEBUG: CustomChordSheetTemplate.build() called - song: ${song.title}, sections: ${song.sections.length}',
+    );
     return Card(
       elevation: 2,
       child: Container(
@@ -332,8 +338,14 @@ class ChordGridPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    print(
+      'DEBUG: ChordGridPainter.paint() called - measures: ${measures.length}, size: $size',
+    );
+
     final measureWidth = size.width / measuresPerLine;
     final measureHeight = size.height;
+
+    print('DEBUG: measureWidth: $measureWidth, measureHeight: $measureHeight');
 
     // Paint styles
     final gridPaint = Paint()
@@ -540,6 +552,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   late Song _song;
   bool _isLoading = true;
   final bool _showExportOptions = false;
+  bool _showWebViewChordSheet = false;
 
   @override
   void initState() {
@@ -548,18 +561,27 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   Future<void> _loadSong() async {
+    print('DEBUG: Loading song with ID: ${widget.songId}');
     try {
       final song = await Provider.of<SongProvider>(
         context,
         listen: false,
       ).getSongById(widget.songId);
+      print('DEBUG: SongProvider returned: $song');
       if (song != null) {
+        print(
+          'DEBUG: Song loaded successfully - Title: ${song.title}, Sections: ${song.sections.length}',
+        );
         setState(() {
           _song = song;
           _isLoading = false;
         });
+      } else {
+        print('DEBUG: Song not found for ID: ${widget.songId}');
+        setState(() => _isLoading = false);
       }
     } catch (e) {
+      print('DEBUG: Error loading song: $e');
       setState(() => _isLoading = false);
       // Handle error
     }
@@ -613,6 +635,17 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
+        // View toggle button
+        IconButton(
+          icon: Icon(
+            _showWebViewChordSheet ? Icons.grid_on : Icons.web,
+            color: _showWebViewChordSheet
+                ? Theme.of(context).colorScheme.primary
+                : null,
+          ),
+          onPressed: _toggleChordSheetView,
+          tooltip: _showWebViewChordSheet ? 'Vue Flutter' : 'Vue Web',
+        ),
         // Favorite button with animation
         Hero(
           tag: 'favorite_${widget.heroTag ?? _song.id}',
@@ -819,10 +852,21 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   /// Build chord grid template
   SliverToBoxAdapter _buildChordGridTemplate() {
+    print(
+      'DEBUG: _buildChordGridTemplate() called - _showWebViewChordSheet: $_showWebViewChordSheet',
+    );
     return SliverToBoxAdapter(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: ChordSheetTemplate(song: _song),
+        child: _showWebViewChordSheet
+            ? ChordSheetWebView(
+                key: ValueKey('webview_${_song.id}'),
+                song: _song,
+              )
+            : CustomChordSheetTemplate(
+                key: ValueKey('template_${_song.id}'),
+                song: _song,
+              ),
       ).animate().fadeIn(delay: 200.ms),
     );
   }
@@ -1038,6 +1082,16 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   // Helper methods
+  void _toggleChordSheetView() {
+    print(
+      'DEBUG: Toggling WebView chord sheet. Current state: $_showWebViewChordSheet',
+    );
+    setState(() {
+      _showWebViewChordSheet = !_showWebViewChordSheet;
+    });
+    print('DEBUG: WebView chord sheet toggled to: $_showWebViewChordSheet');
+  }
+
   void _toggleFavorite() async {
     final success = await Provider.of<SongProvider>(
       context,
