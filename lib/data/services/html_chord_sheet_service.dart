@@ -86,7 +86,7 @@ class HtmlChordSheetService {
         
         .section-title {
             font-weight: bold;
-            font-size: 14px;
+            font-size: 12px;
             margin-bottom: 10px;
             border: 2px solid #000;
             padding: 5px 8px;
@@ -95,30 +95,28 @@ class HtmlChordSheetService {
         }
         
         .chord-block {
-            display: flex;
-            flex-direction: row;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 0;
             align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 12px 8px;
+            justify-items: center;
+            padding: 8px;
             border-right: 2px solid #000;
             min-height: 60px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: bold;
             font-family: 'Courier New', monospace;
-            gap: 2px;
         }
         
         .chord-block:nth-child(4n) {
             border-right: 2px solid #000;
         }
         
-        .chord-line::before {
-            content: '';
-            display: table-cell;
-            border-right: 2px solid #000;
-            width: 0;
-            padding: 8px 2px;
+        .chord {
+            line-height: 1.3;
+            white-space: nowrap;
+            text-align: center;
         }
         
         .volta-numbers {
@@ -163,12 +161,6 @@ class HtmlChordSheetService {
             content: '𝄑';
             display: inline-block;
             margin-left: 10px;
-        }
-
-        /* Individual chord styling */
-        .chord {
-            line-height: 1.3;
-            white-space: nowrap;
         }
     </style>
 </head>
@@ -237,13 +229,19 @@ class HtmlChordSheetService {
           .where((chord) => chord.isNotEmpty)
           .toList();
 
-      // Build chord block with each chord on a separate line
+      // Build chord block in 2x2 grid
       sectionHtml.write('<div class="chord-block">');
-      if (validChords.isNotEmpty) {
-        for (final chord in validChords) {
-          sectionHtml.write('<div class="chord">$chord</div>');
+
+      // Fill up to 4 positions (2x2 grid)
+      for (int i = 0; i < 4; i++) {
+        if (i < validChords.length) {
+          sectionHtml.write('<div class="chord">${validChords[i]}</div>');
+        } else {
+          // Empty cell if less than 4 chords
+          sectionHtml.write('<div class="chord"></div>');
         }
       }
+
       sectionHtml.write('</div>');
     }
 

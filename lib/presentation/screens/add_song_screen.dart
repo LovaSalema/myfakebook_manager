@@ -35,11 +35,15 @@ class _AddSongScreenState extends State<AddSongScreen> {
   List<SongSection> _sections = [
     SongSection(
       name: 'A',
+      sectionType: 'VERSE',
       measures: [
         SongMeasure(chords: ['I', 'V', 'VI', 'IV']),
       ],
     ),
   ];
+
+  // Map to hold text controllers for each measure
+  final Map<String, TextEditingController> _measureControllers = {};
 
   @override
   void initState() {
@@ -57,7 +61,21 @@ class _AddSongScreenState extends State<AddSongScreen> {
       _tempoController.text = song.tempo?.toString() ?? '120';
       _timeSignatureController.text = song.timeSignature;
       _selectedNotationType = song.notationType;
-      // Note: Song structure sections would need to be loaded separately
+
+      // Load song structure sections and measures if they exist
+      if (song.sections.isNotEmpty) {
+        _sections = song.sections.map((section) {
+          return SongSection(
+            name: section.sectionLabel,
+            sectionType:
+                section.sectionType, // Preserve the original section type
+            measures: section.measures.map((measure) {
+              // Store chords as individual items for the single input field
+              return SongMeasure(chords: measure.chords);
+            }).toList(),
+          );
+        }).toList();
+      }
     }
   }
 
@@ -68,6 +86,13 @@ class _AddSongScreenState extends State<AddSongScreen> {
     _keyController.dispose();
     _tempoController.dispose();
     _timeSignatureController.dispose();
+
+    // Dispose all measure controllers
+    for (final controller in _measureControllers.values) {
+      controller.dispose();
+    }
+    _measureControllers.clear();
+
     super.dispose();
   }
 
@@ -90,7 +115,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
         final section = entry.value;
         return Section.create(
           songId: 0, // Will be set after song creation
-          sectionType: 'VERSE',
+          sectionType: section.sectionType, // Use the preserved section type
           sectionLabel: section.name,
           sectionName: section.name,
           sectionOrder: sectionIndex,
@@ -229,6 +254,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       _sections.add(
         SongSection(
           name: nextName,
+          sectionType: 'VERSE',
           measures: [
             SongMeasure(chords: ['I', 'V', 'VI', 'IV']),
           ],
@@ -251,6 +277,36 @@ class _AddSongScreenState extends State<AddSongScreen> {
         SongMeasure(chords: ['I', 'V', 'VI', 'IV']),
       );
     });
+  }
+
+  /// Get or create a controller for a specific measure
+  TextEditingController _getMeasureController(
+    int sectionIndex,
+    int measureIndex,
+  ) {
+    final key = '$sectionIndex-$measureIndex';
+    final measure = _sections[sectionIndex].measures[measureIndex];
+    final currentChordText = measure.chords.join(' ');
+
+    if (!_measureControllers.containsKey(key)) {
+      _measureControllers[key] = TextEditingController(text: currentChordText);
+    } else {
+      // Always update the controller's text to match the current chords
+      if (_measureControllers[key]!.text != currentChordText) {
+        _measureControllers[key]!.text = currentChordText;
+      }
+    }
+    return _measureControllers[key]!;
+  }
+
+  /// Parse chord text into individual chords
+  List<String> _parseChords(String chordText) {
+    if (chordText.trim().isEmpty) return [''];
+    return chordText
+        .split(' ')
+        .map((chord) => chord.trim())
+        .where((chord) => chord.isNotEmpty)
+        .toList();
   }
 
   /// Delete a measure from a section
@@ -529,12 +585,14 @@ class _AddSongScreenState extends State<AddSongScreen> {
     );
   }
 
-  /// Build a measure row with chord inputs
+  /// Build a measure row with a single chord input field
   Widget _buildMeasureRow(
     int sectionIndex,
     int measureIndex,
     SongMeasure measure,
   ) {
+    final controller = _getMeasureController(sectionIndex, measureIndex);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: Column(
@@ -561,50 +619,37 @@ class _AddSongScreenState extends State<AddSongScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Row(
-            children: measure.chords.asMap().entries.map((chordEntry) {
-              final chordIndex = chordEntry.key;
-              final chord = chordEntry.value;
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: TextField(
-                    controller: TextEditingController(text: chord),
-                    textAlign: TextAlign.center,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outline.withOpacity(0.3),
-                        ),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(4),
-                        borderSide: BorderSide(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.outline.withOpacity(0.3),
-                        ),
-                      ),
-                    ),
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                    onChanged: (value) {
-                      setState(() {
-                        _sections[sectionIndex]
-                                .measures[measureIndex]
-                                .chords[chordIndex] =
-                            value;
-                      });
-                    },
-                  ),
+          TextField(
+            controller: controller,
+            decoration: InputDecoration(
+              hintText:
+                  'Entrez les accords séparés par des espaces (ex: I V VI IV)',
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
                 ),
-              );
-            }).toList(),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(4),
+                borderSide: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                ),
+              ),
+            ),
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+            onChanged: (value) {
+              // Update the chords without triggering rebuild
+              final parsedChords = _parseChords(value);
+              _sections[sectionIndex].measures[measureIndex].chords =
+                  parsedChords;
+            },
           ),
         ],
       ),
@@ -615,9 +660,14 @@ class _AddSongScreenState extends State<AddSongScreen> {
 /// Model for a song section
 class SongSection {
   String name;
+  String sectionType;
   List<SongMeasure> measures;
 
-  SongSection({required this.name, required this.measures});
+  SongSection({
+    required this.name,
+    this.sectionType = 'VERSE',
+    required this.measures,
+  });
 }
 
 /// Model for a measure
