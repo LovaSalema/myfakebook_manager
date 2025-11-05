@@ -47,7 +47,7 @@ class CustomChordSheetTemplate extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(context),
+            // _buildHeader(context),
             const SizedBox(height: 20),
             if (song.sections.isNotEmpty) ...[
               _buildChordGridWithCustomPaint(),
@@ -59,7 +59,7 @@ class CustomChordSheetTemplate extends StatelessWidget {
     );
   }
 
-  /// Build header with song metadata
+  //  Build header with song metadata
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -552,7 +552,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   late Song _song;
   bool _isLoading = true;
   final bool _showExportOptions = false;
-  bool _showWebViewChordSheet = false;
 
   @override
   void initState() {
@@ -613,7 +612,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           _buildChordGridTemplate(),
 
           // Repertoires Section
-          _buildRepertoiresSection(),
+          // _buildRepertoiresSection(),
 
           // Bottom spacing for action bar
           const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -631,66 +630,93 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
+        icon: Icon(
+          Icons.arrow_back,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        // View toggle button
-        IconButton(
-          icon: Icon(
-            _showWebViewChordSheet ? Icons.grid_on : Icons.web,
-            color: _showWebViewChordSheet
-                ? Theme.of(context).colorScheme.primary
-                : null,
-          ),
-          onPressed: _toggleChordSheetView,
-          tooltip: _showWebViewChordSheet ? 'Vue Flutter' : 'Vue Web',
-        ),
         // Favorite button with animation
         Hero(
           tag: 'favorite_${widget.heroTag ?? _song.id}',
           child: IconButton(
             icon: Icon(
               _song.isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: _song.isFavorite ? Colors.red : null,
+              color: _song.isFavorite
+                  ? Colors.red
+                  : Theme.of(context).colorScheme.primary,
             ),
             onPressed: _toggleFavorite,
           ),
         ),
         // Edit button
-        IconButton(icon: const Icon(Icons.edit), onPressed: _editSong),
+        IconButton(
+          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
+          onPressed: _editSong,
+        ),
         // More options
         PopupMenuButton<String>(
-          icon: const Icon(Icons.more_vert),
+          icon: Icon(
+            Icons.more_vert,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           onSelected: _handleMenuAction,
           itemBuilder: (context) => [
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'export',
               child: Row(
                 children: [
-                  Icon(Icons.download, size: 20),
-                  SizedBox(width: 8),
-                  Text('Exporter'),
+                  Icon(
+                    Icons.download,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Exporter',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'transpose',
               child: Row(
                 children: [
-                  Icon(Icons.swap_horiz, size: 20),
-                  SizedBox(width: 8),
-                  Text('Transposer'),
+                  Icon(
+                    Icons.swap_horiz,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Transposer',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               ),
             ),
-            const PopupMenuItem(
+            PopupMenuItem(
               value: 'share',
               child: Row(
                 children: [
-                  Icon(Icons.share, size: 20),
-                  SizedBox(width: 8),
-                  Text('Partager'),
+                  Icon(
+                    Icons.share,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Partager',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -852,21 +878,11 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   /// Build chord grid template
   SliverToBoxAdapter _buildChordGridTemplate() {
-    print(
-      'DEBUG: _buildChordGridTemplate() called - _showWebViewChordSheet: $_showWebViewChordSheet',
-    );
+    print('DEBUG: _buildChordGridTemplate() called - Always using WebView');
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: _showWebViewChordSheet
-            ? ChordSheetWebView(
-                key: ValueKey('webview_${_song.id}'),
-                song: _song,
-              )
-            : CustomChordSheetTemplate(
-                key: ValueKey('template_${_song.id}'),
-                song: _song,
-              ),
+      child: ChordSheetWebView(
+        key: ValueKey('webview_${_song.id}'),
+        song: _song,
       ).animate().fadeIn(delay: 200.ms),
     );
   }
@@ -932,6 +948,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   /// Build bottom action bar
   Widget _buildBottomActionBar() {
+    final primaryColor = Theme.of(context).colorScheme.primary;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -946,33 +963,36 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         children: [
           Expanded(
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.download, size: 20),
-              label: const Text('Export'),
+              icon: Icon(Icons.download, size: 20, color: primaryColor),
+              label: Text('Export', style: TextStyle(color: primaryColor)),
               onPressed: _showExportBottomSheet,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: primaryColor),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.swap_horiz, size: 20),
-              label: const Text('Transposer'),
+              icon: Icon(Icons.swap_horiz, size: 20, color: primaryColor),
+              label: Text('Transposer', style: TextStyle(color: primaryColor)),
               onPressed: _transposeSong,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: primaryColor),
               ),
             ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.share, size: 20),
-              label: const Text('Partager'),
+              icon: Icon(Icons.share, size: 20, color: primaryColor),
+              label: Text('Partager', style: TextStyle(color: primaryColor)),
               onPressed: _shareSong,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: primaryColor),
               ),
             ),
           ),
@@ -1068,6 +1088,12 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     width: double.infinity,
                     child: FilledButton(
                       onPressed: () => _exportSong(selectedFormat),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
+                      ),
                       child: const Text('Exporter'),
                     ),
                   ),
@@ -1082,16 +1108,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   }
 
   // Helper methods
-  void _toggleChordSheetView() {
-    print(
-      'DEBUG: Toggling WebView chord sheet. Current state: $_showWebViewChordSheet',
-    );
-    setState(() {
-      _showWebViewChordSheet = !_showWebViewChordSheet;
-    });
-    print('DEBUG: WebView chord sheet toggled to: $_showWebViewChordSheet');
-  }
-
   void _toggleFavorite() async {
     final success = await Provider.of<SongProvider>(
       context,
