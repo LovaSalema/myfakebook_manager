@@ -78,9 +78,9 @@ class HtmlChordSheetService {
         
         .section-group {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             width: 100%;
-            gap: 10px;
+            gap: 5px;
             border-left: 2px solid #000;
         }
         
@@ -98,7 +98,7 @@ class HtmlChordSheetService {
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 0;
+            gap: 4px;
             align-items: center;
             justify-items: center;
             padding: 8px;
@@ -109,14 +109,18 @@ class HtmlChordSheetService {
             font-family: 'Courier New', monospace;
         }
         
-        .chord-block:nth-child(4n) {
+        .chord-block:nth-child(3n) {
             border-right: 2px solid #000;
         }
         
         .chord {
-            line-height: 1.3;
+            line-height: 1.2;
             white-space: nowrap;
             text-align: center;
+            padding: 2px;
+            background-color: #f8f9fa;
+            border-radius: 3px;
+            border: 1px solid #e9ecef;
         }
         
         .volta-numbers {
@@ -125,7 +129,7 @@ class HtmlChordSheetService {
             gap: 60px;
             margin-top: -5px;
             margin-bottom: 5px;
-            margin-left: 15px;
+            margin-left: 10px;
         }
         
         .volta {
