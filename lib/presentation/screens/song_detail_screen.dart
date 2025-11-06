@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:screenshot/screenshot.dart';
 import '../../data/models/song.dart';
 import '../../data/models/section.dart';
 import '../../data/models/measure.dart';
@@ -12,6 +13,7 @@ import '../providers/export_provider.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_helper.dart';
+import '../../data/services/image_export_service.dart';
 import '../widgets/chord_grid/chord_sheet_template.dart';
 import '../widgets/chord_grid/chord_sheet_webview.dart';
 import 'add_song_screen.dart';
@@ -552,6 +554,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   late Song _song;
   bool _isLoading = true;
   final bool _showExportOptions = false;
+  final ScreenshotController _screenshotController = ScreenshotController();
 
   @override
   void initState() {
@@ -880,9 +883,12 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   SliverToBoxAdapter _buildChordGridTemplate() {
     print('DEBUG: _buildChordGridTemplate() called - Always using WebView');
     return SliverToBoxAdapter(
-      child: ChordSheetWebView(
-        key: ValueKey('webview_${_song.id}'),
-        song: _song,
+      child: Screenshot(
+        controller: _screenshotController,
+        child: ChordSheetWebView(
+          key: ValueKey('webview_${_song.id}'),
+          song: _song,
+        ),
       ).animate().fadeIn(delay: 200.ms),
     );
   }
@@ -1207,15 +1213,15 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     );
   }
 
-  void _exportSong(String format) {
+  void _exportSong(String format) async {
     final exportProvider = Provider.of<ExportProvider>(context, listen: false);
 
     switch (format) {
       case 'PNG':
-        exportProvider.exportSongAsImage(_song);
+        await _captureAndExportImage('png');
         break;
       case 'JPG':
-        exportProvider.exportSongAsImage(_song);
+        await _captureAndExportImage('jpg');
         break;
       case 'PDF':
         exportProvider.exportSongAsPDF(_song);
@@ -1223,6 +1229,53 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
     }
 
     Navigator.pop(context); // Close bottom sheet
+  }
+
+  /// Capture screenshot and export as image
+  Future<void> _captureAndExportImage(String format) async {
+    try {
+      print('Capturing screenshot for format: $format');
+
+      // Capture the screenshot
+      final imageBytes = await _screenshotController.capture();
+
+      if (imageBytes == null) {
+        print('Failed to capture screenshot');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la capture de l\'écran'),
+          ),
+        );
+        return;
+      }
+
+      // Generate file name
+      final fileName =
+          '${_song.title.replaceAll(' ', '_')}_chord_sheet.$format';
+
+      // Save the image file
+      final file = await ImageExportService.captureWidgetScreenshot(
+        imageBytes,
+        fileName,
+      );
+
+      if (file != null) {
+        // Share the file
+        await ImageExportService.shareImageFile(file);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Grille exportée en $format avec succès')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur lors de l\'exportation')),
+        );
+      }
+    } catch (e) {
+      print('Error capturing and exporting image: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+    }
   }
 }
 

@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:image/image.dart' as img;
+import 'package:screenshot/screenshot.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/song.dart';
 import '../models/section.dart';
 import '../models/measure.dart';
@@ -449,7 +452,7 @@ class ImageExportService {
     }
   }
 
-  /// Export song as image file (updated method for ExportProvider)
+  /// Export song as image file by capturing the widget screenshot
   static Future<File?> exportSongAsImage(
     Song song, {
     int quality = 90,
@@ -457,13 +460,45 @@ class ImageExportService {
     bool showMusicSymbols = true,
   }) async {
     try {
-      final imageBytes = _createChordGridImage(song);
-      // In a real implementation, this would save to a file and return File object
-      // For now, return null as placeholder
+      // This method is now deprecated since we'll capture the widget directly
+      // Keeping it for compatibility but it will return null
+      print(
+        'Warning: Using deprecated export method. Use captureWidgetScreenshot instead.',
+      );
       return null;
     } catch (e) {
       print('Error exporting song as image: $e');
       return null;
+    }
+  }
+
+  /// Capture a widget screenshot and save it as an image file
+  static Future<File?> captureWidgetScreenshot(
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/$fileName';
+      final file = File(filePath);
+
+      await file.writeAsBytes(imageBytes);
+      print('Screenshot saved to: $filePath');
+      return file;
+    } catch (e) {
+      print('Error saving screenshot: $e');
+      return null;
+    }
+  }
+
+  /// Share image file using share_plus
+  static Future<void> shareImageFile(File imageFile) async {
+    try {
+      await Share.shareXFiles([
+        XFile(imageFile.path),
+      ], text: 'Chord Sheet Export');
+    } catch (e) {
+      print('Error sharing image: $e');
     }
   }
 
@@ -472,7 +507,7 @@ class ImageExportService {
     return AppConstants.formatFileSize(imageBytes.length);
   }
 
-  /// Validate image export settings
+  /// Validate export settings
   static List<String> validateExportSettings(Map<String, dynamic> settings) {
     final errors = <String>[];
 
@@ -489,22 +524,5 @@ class ImageExportService {
     }
 
     return errors;
-  }
-
-  /// Share image file
-  static Future<void> shareImage(Uint8List imageBytes, String fileName) async {
-    // This would typically use the share_plus package
-    // For now, we'll just save the file
-    await _saveImageFile(imageBytes, fileName);
-  }
-
-  /// Save image to device storage
-  static Future<void> _saveImageFile(
-    Uint8List imageBytes,
-    String fileName,
-  ) async {
-    // Implementation would use path_provider and file operations
-    // This is a placeholder for the actual file saving logic
-    print('Saving image file: $fileName');
   }
 }
