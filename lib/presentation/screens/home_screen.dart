@@ -825,7 +825,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Éditer'),
                 onTap: () {
                   Navigator.pop(context);
-                  // Edit implementation
+                  _editSong(song);
                 },
               ),
               ListTile(
@@ -851,8 +851,69 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _editSong(Song song) {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => AddSongScreen(song: song)));
+  }
+
   void _deleteSong(Song song) {
-    // Implementation for deleting song
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Supprimer la chanson'),
+          content: Text(
+            'Êtes-vous sûr de vouloir supprimer "${song.title}" par ${song.artist} ? Cette action est irréversible.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  final songProvider = Provider.of<SongProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final success = await songProvider.deleteSong(song.id!);
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('"${song.title}" a été supprimé'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Erreur lors de la suppression'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Supprimer',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _addToRepertoire(Song song) {
