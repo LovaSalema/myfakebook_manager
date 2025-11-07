@@ -469,7 +469,10 @@ class _AddSongScreenState extends State<AddSongScreen> {
             : Color(AppColors.backgroundLight),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -544,89 +547,70 @@ class _AddSongScreenState extends State<AddSongScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Ligne Ton et Tempo
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ton',
-                          style: AppTextStyles.labelMedium.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          value: _selectedKey,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
-                            ),
-                          ),
-                          items: _musicalKeys.map((String key) {
-                            return DropdownMenuItem<String>(
-                              value: key,
-                              child: Text(key),
-                            );
-                          }).toList(),
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedKey = newValue;
-                              });
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Veuillez sélectionner une tonalité';
-                            }
-                            return null;
-                          },
-                        ),
-                      ],
-                    ),
+              // Ton
+              Text(
+                'Ton',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<String>(
+                value: _selectedKey,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Tempo (BPM)',
-                          style: AppTextStyles.labelMedium.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Column(
-                          children: [
-                            Slider(
-                              value: _tempoValue,
-                              min: 20,
-                              max: 300,
-                              divisions: 280,
-                              label: '${_tempoValue.toInt()} BPM',
-                              onChanged: (value) {
-                                setState(() {
-                                  _tempoValue = value;
-                                });
-                              },
-                            ),
-                            Text(
-                              '${_tempoValue.toInt()} BPM',
-                              style: AppTextStyles.labelSmall.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.6),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                ),
+                items: _musicalKeys.map((String key) {
+                  return DropdownMenuItem<String>(value: key, child: Text(key));
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedKey = newValue;
+                    });
+                  }
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez sélectionner une tonalité';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Tempo (BPM)
+              Text(
+                'Tempo (BPM)',
+                style: AppTextStyles.labelMedium.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Column(
+                children: [
+                  Slider(
+                    value: _tempoValue,
+                    min: 20,
+                    max: 300,
+                    divisions: 280,
+                    label: '${_tempoValue.toInt()} BPM',
+                    onChanged: (value) {
+                      setState(() {
+                        _tempoValue = value;
+                      });
+                    },
+                  ),
+                  Text(
+                    '${_tempoValue.toInt()} BPM',
+                    style: AppTextStyles.labelSmall.copyWith(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.6),
                     ),
                   ),
                 ],

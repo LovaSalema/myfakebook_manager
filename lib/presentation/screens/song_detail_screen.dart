@@ -620,6 +620,55 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           // Structure Card (if defined)
           _buildStructureCard(),
 
+          // Metronome control above chord sheet
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: _isMetronomePlaying
+                                ? Colors.red
+                                : Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          ),
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            _isMetronomePlaying ? Icons.stop : Icons.play_arrow,
+                            size: 20,
+                            color: _isMetronomePlaying
+                                ? Colors.red
+                                : Theme.of(context).colorScheme.primary,
+                          ),
+                          onPressed: _toggleMetronome,
+                          padding: const EdgeInsets.all(10),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'métronome',
+                        style: TextStyle(
+                          color: _isMetronomePlaying
+                              ? Colors.red
+                              : Theme.of(context).colorScheme.primary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+
           // Chord Grid Template
           _buildChordGridTemplate(),
 
@@ -974,81 +1023,42 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          // Metronome button (full width)
-          SizedBox(
-            width: double.infinity,
+          Expanded(
             child: OutlinedButton.icon(
-              icon: Icon(
-                _isMetronomePlaying ? Icons.stop : Icons.play_arrow,
-                size: 20,
-                color: _isMetronomePlaying ? Colors.red : primaryColor,
-              ),
-              label: Text(
-                _isMetronomePlaying
-                    ? 'Arrêter le métronome'
-                    : 'Jouer le métronome',
-                style: TextStyle(
-                  color: _isMetronomePlaying ? Colors.red : primaryColor,
-                ),
-              ),
-              onPressed: _toggleMetronome,
+              icon: Icon(Icons.download, size: 20, color: primaryColor),
+              label: Text('Export', style: TextStyle(color: primaryColor)),
+              onPressed: _showExportBottomSheet,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(
-                  color: _isMetronomePlaying ? Colors.red : primaryColor,
-                ),
+                side: BorderSide(color: primaryColor),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          // Other action buttons
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: Icon(Icons.download, size: 20, color: primaryColor),
-                  label: Text('Export', style: TextStyle(color: primaryColor)),
-                  onPressed: _showExportBottomSheet,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: primaryColor),
-                  ),
-                ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.swap_horiz, size: 20, color: primaryColor),
+              label: Text('Transposer', style: TextStyle(color: primaryColor)),
+              onPressed: _transposeSong,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: primaryColor),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: Icon(Icons.swap_horiz, size: 20, color: primaryColor),
-                  label: Text(
-                    'Transposer',
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  onPressed: _transposeSong,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: primaryColor),
-                  ),
-                ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: OutlinedButton.icon(
+              icon: Icon(Icons.share, size: 20, color: primaryColor),
+              label: Text('Partager', style: TextStyle(color: primaryColor)),
+              onPressed: _captureAndShareImage,
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                side: BorderSide(color: primaryColor),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: OutlinedButton.icon(
-                  icon: Icon(Icons.share, size: 20, color: primaryColor),
-                  label: Text(
-                    'Partager',
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  onPressed: _captureAndShareImage,
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: BorderSide(color: primaryColor),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

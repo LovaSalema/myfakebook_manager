@@ -195,7 +195,10 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
             : Color(AppColors.backgroundLight),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(
+            Icons.arrow_back,
+            color: Theme.of(context).colorScheme.primary,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
