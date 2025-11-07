@@ -14,6 +14,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_helper.dart';
 import '../../data/services/image_export_service.dart';
+import '../../core/services/metronome_service.dart';
 import '../widgets/chord_grid/chord_sheet_template.dart';
 import '../widgets/chord_grid/chord_sheet_webview.dart';
 import 'add_song_screen.dart';
@@ -555,11 +556,19 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   bool _isLoading = true;
   final bool _showExportOptions = false;
   final ScreenshotController _screenshotController = ScreenshotController();
+  final MetronomeService _metronomeService = MetronomeService();
+  bool _isMetronomePlaying = false;
 
   @override
   void initState() {
     super.initState();
     _loadSong();
+  }
+
+  @override
+  void dispose() {
+    _metronomeService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadSong() async {
@@ -965,42 +974,81 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
+          // Metronome button (full width)
+          SizedBox(
+            width: double.infinity,
             child: OutlinedButton.icon(
-              icon: Icon(Icons.download, size: 20, color: primaryColor),
-              label: Text('Export', style: TextStyle(color: primaryColor)),
-              onPressed: _showExportBottomSheet,
+              icon: Icon(
+                _isMetronomePlaying ? Icons.stop : Icons.play_arrow,
+                size: 20,
+                color: _isMetronomePlaying ? Colors.red : primaryColor,
+              ),
+              label: Text(
+                _isMetronomePlaying
+                    ? 'Arrêter le métronome'
+                    : 'Jouer le métronome',
+                style: TextStyle(
+                  color: _isMetronomePlaying ? Colors.red : primaryColor,
+                ),
+              ),
+              onPressed: _toggleMetronome,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: primaryColor),
+                side: BorderSide(
+                  color: _isMetronomePlaying ? Colors.red : primaryColor,
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: Icon(Icons.swap_horiz, size: 20, color: primaryColor),
-              label: Text('Transposer', style: TextStyle(color: primaryColor)),
-              onPressed: _transposeSong,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: primaryColor),
+          const SizedBox(height: 12),
+          // Other action buttons
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.download, size: 20, color: primaryColor),
+                  label: Text('Export', style: TextStyle(color: primaryColor)),
+                  onPressed: _showExportBottomSheet,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: primaryColor),
+                  ),
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: Icon(Icons.share, size: 20, color: primaryColor),
-              label: Text('Partager', style: TextStyle(color: primaryColor)),
-              onPressed: _captureAndShareImage,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: primaryColor),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.swap_horiz, size: 20, color: primaryColor),
+                  label: Text(
+                    'Transposer',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  onPressed: _transposeSong,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: primaryColor),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.share, size: 20, color: primaryColor),
+                  label: Text(
+                    'Partager',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  onPressed: _captureAndShareImage,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: primaryColor),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -1155,6 +1203,26 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   void _transposeSong() {
     // Implementation for transposing song
+  }
+
+  void _toggleMetronome() async {
+    if (_song.tempo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Aucun tempo défini pour cette chanson'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (_isMetronomePlaying) {
+      _metronomeService.stop();
+      setState(() => _isMetronomePlaying = false);
+    } else {
+      await _metronomeService.start(_song.tempo!);
+      setState(() => _isMetronomePlaying = true);
+    }
   }
 
   void _deleteSong() {

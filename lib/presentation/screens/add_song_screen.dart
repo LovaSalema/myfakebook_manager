@@ -26,7 +26,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _titleController = TextEditingController();
   late final _artistController = TextEditingController();
-  late final _tempoController = TextEditingController(text: '120');
+  double _tempoValue = 120.0;
   late final _timeSignatureController = TextEditingController(text: '4/4');
 
   // Musical keys for dropdown
@@ -76,7 +76,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       _titleController.text = song.title;
       _artistController.text = song.artist;
       _selectedKey = song.key;
-      _tempoController.text = song.tempo?.toString() ?? '120';
+      _tempoValue = song.tempo?.toDouble() ?? 120.0;
       _timeSignatureController.text = song.timeSignature;
       _selectedNotationType = song.notationType;
 
@@ -101,7 +101,6 @@ class _AddSongScreenState extends State<AddSongScreen> {
   void dispose() {
     _titleController.dispose();
     _artistController.dispose();
-    _tempoController.dispose();
     _timeSignatureController.dispose();
 
     // Dispose all measure controllers
@@ -258,7 +257,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       artist: _artistController.text.trim(),
       key: _selectedKey,
       timeSignature: _timeSignatureController.text.trim(),
-      tempo: int.tryParse(_tempoController.text) ?? 120,
+      tempo: _tempoValue.toInt(),
       style: null,
       notationType: _selectedNotationType,
       updatedAt: DateTime.now(),
@@ -307,7 +306,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       artist: _artistController.text.trim(),
       key: _selectedKey,
       timeSignature: _timeSignatureController.text.trim(),
-      tempo: int.tryParse(_tempoController.text) ?? 120,
+      tempo: _tempoValue.toInt(),
       style: null,
       notationType: _selectedNotationType,
     ).copyWith(sections: sections);
@@ -603,17 +602,29 @@ class _AddSongScreenState extends State<AddSongScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _tempoController,
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            hintText: '120',
-                            border: OutlineInputBorder(),
-                            contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 12,
+                        Column(
+                          children: [
+                            Slider(
+                              value: _tempoValue,
+                              min: 20,
+                              max: 300,
+                              divisions: 280,
+                              label: '${_tempoValue.toInt()} BPM',
+                              onChanged: (value) {
+                                setState(() {
+                                  _tempoValue = value;
+                                });
+                              },
                             ),
-                          ),
+                            Text(
+                              '${_tempoValue.toInt()} BPM',
+                              style: AppTextStyles.labelSmall.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.6),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
