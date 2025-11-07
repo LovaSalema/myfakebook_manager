@@ -476,7 +476,8 @@ class _AddSongScreenState extends State<AddSongScreen> {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          widget.song != null ? 'Modifier la chanson' : 'Créer une chanson',
+          widget.song != null ? 'Modifier la chanson' : 'créer une chanson',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
         actions: [
           IconButton(

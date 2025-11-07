@@ -190,7 +190,8 @@ class _AddRepertoireScreenState extends State<AddRepertoireScreen> {
         title: Text(
           widget.repertoire != null
               ? 'Modifier le répertoire'
-              : 'Créer un répertoire',
+              : 'Créer Un répertoire',
+          style: TextStyle(color: Theme.of(context).colorScheme.primary),
         ),
         actions: [
           IconButton(

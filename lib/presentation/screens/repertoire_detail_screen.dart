@@ -208,6 +208,7 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
+            color: Theme.of(context).colorScheme.primary,
             onPressed: _addExistingSongs,
             tooltip: 'Ajouter des chansons existantes',
           ),
