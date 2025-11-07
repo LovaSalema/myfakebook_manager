@@ -26,9 +26,25 @@ class _AddSongScreenState extends State<AddSongScreen> {
   final _formKey = GlobalKey<FormState>();
   late final _titleController = TextEditingController();
   late final _artistController = TextEditingController();
-  late final _keyController = TextEditingController(text: 'C');
   late final _tempoController = TextEditingController(text: '120');
   late final _timeSignatureController = TextEditingController(text: '4/4');
+
+  // Musical keys for dropdown
+  final List<String> _musicalKeys = [
+    'C',
+    'C#',
+    'D',
+    'Eb',
+    'E',
+    'F',
+    'F#',
+    'G',
+    'Ab',
+    'A',
+    'Bb',
+    'B',
+  ];
+  String _selectedKey = 'C';
 
   bool _isSaving = false;
   String _selectedNotationType = 'ROMAN_NUMERALS';
@@ -59,7 +75,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       final song = widget.song!;
       _titleController.text = song.title;
       _artistController.text = song.artist;
-      _keyController.text = song.key;
+      _selectedKey = song.key;
       _tempoController.text = song.tempo?.toString() ?? '120';
       _timeSignatureController.text = song.timeSignature;
       _selectedNotationType = song.notationType;
@@ -85,7 +101,6 @@ class _AddSongScreenState extends State<AddSongScreen> {
   void dispose() {
     _titleController.dispose();
     _artistController.dispose();
-    _keyController.dispose();
     _tempoController.dispose();
     _timeSignatureController.dispose();
 
@@ -241,7 +256,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
     final updatedSong = widget.song!.copyWith(
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
-      key: _keyController.text.trim(),
+      key: _selectedKey,
       timeSignature: _timeSignatureController.text.trim(),
       tempo: int.tryParse(_tempoController.text) ?? 120,
       style: null,
@@ -290,7 +305,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
     final song = Song.create(
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
-      key: _keyController.text.trim(),
+      key: _selectedKey,
       timeSignature: _timeSignatureController.text.trim(),
       tempo: int.tryParse(_tempoController.text) ?? 120,
       style: null,
@@ -544,16 +559,34 @@ class _AddSongScreenState extends State<AddSongScreen> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
-                          controller: _keyController,
+                        DropdownButtonFormField<String>(
+                          value: _selectedKey,
                           decoration: const InputDecoration(
-                            hintText: 'C',
                             border: OutlineInputBorder(),
                             contentPadding: EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 12,
                             ),
                           ),
+                          items: _musicalKeys.map((String key) {
+                            return DropdownMenuItem<String>(
+                              value: key,
+                              child: Text(key),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            if (newValue != null) {
+                              setState(() {
+                                _selectedKey = newValue;
+                              });
+                            }
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Veuillez sélectionner une tonalité';
+                            }
+                            return null;
+                          },
                         ),
                       ],
                     ),

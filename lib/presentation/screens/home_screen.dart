@@ -937,7 +937,103 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showRepertoireContextMenu(Repertoire repertoire) {
-    // Implementation for repertoire context menu
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit),
+                title: const Text('Éditer'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editRepertoire(repertoire);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete),
+                title: const Text('Supprimer'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteRepertoire(repertoire);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _editRepertoire(Repertoire repertoire) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => AddRepertoireScreen(repertoire: repertoire),
+      ),
+    );
+  }
+
+  void _deleteRepertoire(Repertoire repertoire) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Supprimer le répertoire'),
+          content: Text(
+            'Êtes-vous sûr de vouloir supprimer "${repertoire.name}" ? Toutes les chansons associées seront retirées du répertoire. Cette action est irréversible.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+                try {
+                  final repertoireProvider = Provider.of<RepertoireProvider>(
+                    context,
+                    listen: false,
+                  );
+                  final success = await repertoireProvider.deleteRepertoire(
+                    repertoire.id!,
+                  );
+
+                  if (success) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('"${repertoire.name}" a été supprimé'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Erreur lors de la suppression'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Erreur: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Supprimer',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _createNewRepertoire() {
