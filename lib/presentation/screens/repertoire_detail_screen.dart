@@ -88,12 +88,17 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
 
   /// Navigate to create new song screen for this repertoire
   void _createNewSong() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => AddSongScreen())).then((_) {
-      // Reload data when returning from song creation
-      _loadRepertoireData();
-    });
+    Navigator.of(context)
+        .push(
+          MaterialPageRoute(
+            builder: (context) =>
+                AddSongScreen(repertoireId: widget.repertoireId),
+          ),
+        )
+        .then((_) {
+          // Reload data when returning from song creation
+          _loadRepertoireData();
+        });
   }
 
   /// Show modal with add options

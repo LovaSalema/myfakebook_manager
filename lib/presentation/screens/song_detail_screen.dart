@@ -995,7 +995,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
             child: OutlinedButton.icon(
               icon: Icon(Icons.share, size: 20, color: primaryColor),
               label: Text('Partager', style: TextStyle(color: primaryColor)),
-              onPressed: _shareSong,
+              onPressed: _captureAndShareImage,
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 side: BorderSide(color: primaryColor),
@@ -1145,7 +1145,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         _transposeSong();
         break;
       case 'share':
-        _shareSong();
+        _captureAndShareImage(); // Partage direct en PNG
         break;
       case 'delete':
         _deleteSong();
@@ -1155,10 +1155,6 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
   void _transposeSong() {
     // Implementation for transposing song
-  }
-
-  void _shareSong() {
-    // Implementation for sharing song
   }
 
   void _deleteSong() {
@@ -1253,21 +1249,23 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       final fileName =
           '${_song.title.replaceAll(' ', '_')}_chord_sheet.$format';
 
-      // Save the image file
-      final file = await ImageExportService.captureWidgetScreenshot(
+      // Save the image to gallery
+      final success = await ImageExportService.saveImageToGallery(
         imageBytes,
         fileName,
       );
 
-      if (file != null) {
-        // Share the file
-        await ImageExportService.shareImageFile(file);
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Grille exportée en $format avec succès')),
+          const SnackBar(
+            content: Text('Image sauvegardée dans la galerie avec succès'),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de l\'exportation')),
+          const SnackBar(
+            content: Text('Erreur lors de la sauvegarde dans la galerie'),
+          ),
         );
       }
     } catch (e) {
@@ -1275,6 +1273,39 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+    }
+  }
+
+  /// Capture screenshot and share as image
+  Future<void> _captureAndShareImage() async {
+    try {
+      print('Capturing screenshot for sharing');
+
+      // Capture the screenshot
+      final imageBytes = await _screenshotController.capture();
+
+      if (imageBytes == null) {
+        print('Failed to capture screenshot');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la capture de l\'écran'),
+          ),
+        );
+        return;
+      }
+
+      // Generate file name
+      final fileName = '${_song.title.replaceAll(' ', '_')}_chord_sheet.png';
+
+      // Share the image
+      await ImageExportService.shareImageBytes(imageBytes, fileName);
+
+      // Note: No snackbar needed for sharing as the share sheet handles feedback
+    } catch (e) {
+      print('Error capturing and sharing image: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erreur lors du partage: $e')));
     }
   }
 }

@@ -1,0 +1,461 @@
+Initialized native services in: E:\AI\.gradle\native
+Initialized jansi services in: E:\AI\.gradle\native
+Found daemon DaemonInfo{pid=10372, address=[118bf62b-a1f2-4182-be11-71a7e7ac38ce port:49704, addresses:[/127.0.0.1]], state=Idle, lastBusy=1762510752907, context=DefaultDaemonContext[uid=37d34fbf-eff2-477c-9756-71c06c7d24be,javaHome=C:\Program Files\Android\Android Studio\jbr,javaVersion=21,javaVendor=JetBrains s.r.o.,daemonRegistryDir=E:\AI\.gradle\daemon,pid=10372,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=4G,-XX:ReservedCodeCacheSize=512m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx8G,-Dfile.encoding=UTF-8,-Duser.country=FR,-Duser.language=fr,-Duser.variant]} however its context does not match the desired criteria.
+JVM is incompatible.
+Wanted: DaemonRequestContext{jvmCriteria=C:\Program Files\Java\jdk-17 (no JDK specified, using current Java home), daemonOpts=[-XX:MaxMetaspaceSize=4G, -XX:ReservedCodeCacheSize=512m, -XX:+HeapDumpOnOutOfMemoryError, -Xmx8G, -Dfile.encoding=windows-1252, -Duser.country=FR, -Duser.language=fr, -Duser.variant], applyInstrumentationAgent=true, nativeServicesMode=ENABLED, priority=NORMAL}
+Actual: DefaultDaemonContext[uid=37d34fbf-eff2-477c-9756-71c06c7d24be,javaHome=C:\Program Files\Android\Android Studio\jbr,javaVersion=21,javaVendor=JetBrains s.r.o.,daemonRegistryDir=E:\AI\.gradle\daemon,pid=10372,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-XX:MaxMetaspaceSize=4G,-XX:ReservedCodeCacheSize=512m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx8G,-Dfile.encoding=UTF-8,-Duser.country=FR,-Duser.language=fr,-Duser.variant]
+
+  Looking for a different daemon...
+The client will now receive all logging from the daemon (pid: 17020). The daemon log file: E:\AI\.gradle\daemon\8.12\daemon-17020.out.log
+Starting 2nd build in daemon [uptime: 7 mins 42.754 secs, performance: 100%, GC rate: 0.00/s, heap usage: 0% of 8 GiB, non-heap usage: 4% of 4 GiB]
+Using 4 worker leases.
+Invalidating in-memory cache of E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\.gradle\8.12\fileHashes\fileHashes.bin
+Invalidating in-memory cache of E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\.gradle\buildOutputCleanup\outputFiles.bin
+Invalidating in-memory cache of E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\.gradle\8.12\fileHashes\resourceHashesCache.bin
+Now considering [E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle] as hierarchies to watch
+Watching the file system is configured to be enabled if available
+File system watching is active
+Starting Build
+Now considering [E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle, E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android] as hierarchies to watch
+Invalidating in-memory cache of E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\.gradle\buildOutputCleanup\outputFiles.bin
+
+> Configure project :gradle
+Evaluating project ':gradle' using build file 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build.gradle.kts'.
+Resolved plugin [id: 'org.gradle.java-gradle-plugin']
+Resolved plugin [id: 'org.gradle.groovy']
+Resolved plugin [id: 'org.gradle.kotlin.kotlin-dsl', version: '5.1.2']
+Resolved plugin [id: 'org.jetbrains.kotlin.jvm', version: '1.9.20']
+Invalidating in-memory cache of E:\AI\.gradle\caches\journal-1\file-access.bin
+Invalidating in-memory cache of E:\AI\.gradle\caches\8.12\fileHashes\fileHashes.bin
+Invalidating in-memory cache of E:\AI\.gradle\caches\8.12\fileHashes\resourceHashesCache.bin
+Using Kotlin Gradle Plugin gradle85 variant
+kotlin scripting plugin: created the scripting discovery configuration: kotlinScriptDef
+kotlin scripting plugin: created the scripting discovery configuration: testKotlinScriptDef
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+Resolved plugin [id: 'dev.flutter.flutter-plugin-loader', version: '1.0.0']
+Resolved plugin [id: 'com.android.application', version: '8.9.1', apply: false]
+Resolved plugin [id: 'org.jetbrains.kotlin.android', version: '2.1.0', apply: false]
+Resolve mutations for :gradle:checkKotlinGradlePluginConfigurationErrors (Thread[included builds,5,main]) started.
+:gradle:checkKotlinGradlePluginConfigurationErrors (Thread[included builds,5,main]) started.
+Invalidating in-memory cache of E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\.gradle\8.12\executionHistory\executionHistory.bin
+
+> Task :gradle:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':gradle:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :gradle:compileKotlin (Thread[included builds,5,main]) started.
+:gradle:compileKotlin (Thread[included builds,5,main]) started.
+Resolve mutations for :gradle:pluginDescriptors (Thread[Execution worker,5,main]) started.
+:gradle:pluginDescriptors (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:pluginDescriptors UP-TO-DATE
+Caching disabled for task ':gradle:pluginDescriptors' because:
+  Build cache is disabled
+  Not worth caching
+Skipping task ':gradle:pluginDescriptors' as it is up-to-date.
+Resolve mutations for :gradle:processResources (Thread[Execution worker,5,main]) started.
+:gradle:processResources (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:processResources
+Caching disabled for task ':gradle:processResources' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle:processResources' is not up-to-date because:
+  Value of input property 'rootSpec$1.filteringCharset' has changed for task ':gradle:processResources'
+  Value of input property 'rootSpec$2.filteringCharset' has changed for task ':gradle:processResources'
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\resources', not found
+
+> Task :gradle:compileKotlin
+Caching disabled for task ':gradle:compileKotlin' because:
+  Build cache is disabled
+Task ':gradle:compileKotlin' is not up-to-date because:
+  Value of input property 'kotlinJavaToolchainProvider.javaVersion' has changed for task ':gradle:compileKotlin'
+The input changes require a full rebuild for incremental task ':gradle:compileKotlin'.
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\java', not found
+Kotlin source files: E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\AppLinkSettings.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\BaseApplicationNameHandler.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\Deeplink.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\DependencyVersionChecker.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterAppPluginLoaderPlugin.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterExtension.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPlugin.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPluginConstants.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\FlutterPluginUtils.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\IntentFilterCheck.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\NativePluginLoaderReflectionBridge.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\plugins\PluginHandler.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\BaseFlutterTask.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\BaseFlutterTaskHelper.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\FlutterTask.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\tasks\FlutterTaskHelper.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\VersionFetcher.kt, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\src\main\kotlin\VersionUtils.kt
+Java source files: 
+Script source files: 
+Script file extensions: 
+Using Kotlin/JVM incremental compilation
+[KOTLIN] Kotlin compilation 'jdkHome' argument: C:\Program Files\Java\jdk-17
+Options for KOTLIN DAEMON: IncrementalCompilationOptions(super=CompilationOptions(compilerMode=INCREMENTAL_COMPILER, targetPlatform=JVM, reportCategories=[0, 3], reportSeverity=2, requestedCompilationResults=[0], kotlinScriptExtensions=[]), areFileChangesKnown=false, modifiedFiles=null, deletedFiles=null, classpathChanges=NotAvailableForNonIncrementalRun, workingDir=E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\cacheable, multiModuleICSettings=MultiModuleICSettings(buildHistoryFile=E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\local-state\build-history.bin, useModuleDetection=false), usePreciseJavaTracking=true, icFeatures=IncrementalCompilationFeatures(withAbiSnapshot=false, preciseCompilationResultsBackup=true, keepIncrementalCompilationCachesInMemory=true, enableUnsafeIncrementalCompilationForMultiplatform=false), outputFiles=[E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\classes\kotlin\main, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\cacheable, E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\kotlin\compileKotlin\local-state])
+w: file:///E:/Tech/Flutter/src/flutter/packages/flutter_tools/gradle/src/main/kotlin/DependencyVersionChecker.kt:194:39 'getter for minSdkVersion: AndroidVersion' is deprecated. Will be removed in v9.0
+w: file:///E:/Tech/Flutter/src/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:11:37 'ApkVariant' is deprecated. Deprecated in Java
+w: file:///E:/Tech/Flutter/src/flutter/packages/flutter_tools/gradle/src/main/kotlin/FlutterPlugin.kt:628:69 'ApkVariant' is deprecated. Deprecated in Java
+Finished executing kotlin compiler using DAEMON strategy
+Resolve mutations for :gradle:compileJava (Thread[included builds,5,main]) started.
+:gradle:compileJava (Thread[included builds,5,main]) started.
+
+> Task :gradle:compileJava NO-SOURCE
+Skipping task ':gradle:compileJava' as it has no source files and no previous output files.
+Resolve mutations for :gradle:compileGroovy (Thread[included builds,5,main]) started.
+:gradle:compileGroovy (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:compileGroovy NO-SOURCE
+Skipping task ':gradle:compileGroovy' as it has no source files and no previous output files.
+Resolve mutations for :gradle:classes (Thread[Execution worker,5,main]) started.
+:gradle:classes (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:classes
+Skipping task ':gradle:classes' as it has no actions.
+Resolve mutations for :gradle:jar (Thread[Execution worker,5,main]) started.
+:gradle:jar (Thread[Execution worker,5,main]) started.
+
+> Task :gradle:jar
+Caching disabled for task ':gradle:jar' because:
+  Build cache is disabled
+  Not worth caching
+Task ':gradle:jar' is not up-to-date because:
+  Value of input property 'rootSpec$1.filteringCharset' has changed for task ':gradle:jar'
+  Value of input property 'rootSpec$2$1.filteringCharset' has changed for task ':gradle:jar'
+  Value of input property 'rootSpec$2.filteringCharset' has changed for task ':gradle:jar'
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\classes\java\main', not found
+file or directory 'E:\Tech\Flutter\src\flutter\packages\flutter_tools\gradle\build\classes\groovy\main', not found
+Settings evaluated using settings file 'E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\settings.gradle.kts'.
+Projects loaded. Root project using build file 'E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\build.gradle.kts'.
+Included projects: [root project 'android', project ':app', project ':image_gallery_saver_plus', project ':path_provider_android', project ':permission_handler_android', project ':printing', project ':share_plus', project ':shared_preferences_android', project ':sqflite_android', project ':webview_flutter_android']
+
+> Configure project :app
+Evaluating project ':app' using build file 'E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\app\build.gradle.kts'.
+Resolved plugin [id: 'com.android.application']
+Resolved plugin [id: 'org.jetbrains.kotlin.android']
+Resolved plugin [id: 'dev.flutter.flutter-gradle-plugin']
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+C/C++: android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir in local.properties is E:\Android\Sdk\ndk\25.1.8937393
+C/C++: Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: sdkFolder is E:\Android\Sdk
+C/C++: Checking whether deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK
+C/C++: ndk.dir delete check : android.ndkVersion from module build.gradle is [25.1.8937393]
+C/C++: ndk.dir delete check : android.ndkPath from module build.gradle is not set
+C/C++: ndk.dir delete check : ndk.dir in local.properties is not set
+C/C++: ndk.dir delete check : Not considering ANDROID_NDK_HOME because support was removed after deprecation period.
+C/C++: ndk.dir delete check : sdkFolder is E:\Android\Sdk
+C/C++: ndk.dir delete check : Deleting ndk.dir and setting android.ndkVersion to [25.1.8937393] would result in the same NDK.
+WARNING: [CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+[CXX5106] NDK was located by using ndk.dir property. This method is deprecated and will be removed in a future release. Please delete ndk.dir from local.properties and set android.ndkVersion to [25.1.8937393] in all native modules in the project. https://developer.android.com/r/studio-ui/ndk-dir
+
+> Configure project :
+Evaluating root project 'android' using build file 'E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\build.gradle.kts'.
+
+> Configure project :image_gallery_saver_plus
+Evaluating project ':image_gallery_saver_plus' using build file 'E:\Pub\Cache\hosted\pub.dev\image_gallery_saver_plus-3.0.5\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+
+> Configure project :path_provider_android
+Evaluating project ':path_provider_android' using build file 'E:\Pub\Cache\hosted\pub.dev\path_provider_android-2.2.20\android\build.gradle'.
+Using default execution profile
+
+> Configure project :permission_handler_android
+Evaluating project ':permission_handler_android' using build file 'E:\Pub\Cache\hosted\pub.dev\permission_handler_android-12.1.0\android\build.gradle'.
+Using default execution profile
+
+> Configure project :printing
+Evaluating project ':printing' using build file 'E:\Pub\Cache\hosted\pub.dev\printing-5.14.2\android\build.gradle'.
+Using default execution profile
+
+> Configure project :share_plus
+Evaluating project ':share_plus' using build file 'E:\Pub\Cache\hosted\pub.dev\share_plus-7.2.2\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+
+> Configure project :shared_preferences_android
+Evaluating project ':shared_preferences_android' using build file 'E:\Pub\Cache\hosted\pub.dev\shared_preferences_android-2.4.15\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+
+> Configure project :sqflite_android
+Evaluating project ':sqflite_android' using build file 'E:\Pub\Cache\hosted\pub.dev\sqflite_android-2.4.2+2\android\build.gradle'.
+Using default execution profile
+
+> Configure project :webview_flutter_android
+Evaluating project ':webview_flutter_android' using build file 'E:\Pub\Cache\hosted\pub.dev\webview_flutter_android-4.10.5\android\build.gradle'.
+Using default execution profile
+Using Kotlin Gradle Plugin gradle85 variant
+Your project is configured with Android NDK 25.1.8937393, but the following plugin(s) depend on a different Android NDK version:
+- image_gallery_saver_plus requires Android NDK 27.0.12077973
+- path_provider_android requires Android NDK 27.0.12077973
+- permission_handler_android requires Android NDK 27.0.12077973
+- printing requires Android NDK 27.0.12077973
+- share_plus requires Android NDK 27.0.12077973
+- shared_preferences_android requires Android NDK 27.0.12077973
+- sqflite_android requires Android NDK 27.0.12077973
+- webview_flutter_android requires Android NDK 27.0.12077973
+Fix this issue by using the highest Android NDK version (they are backward compatible).
+Add the following to E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\app\build.gradle.kts:
+
+    android {
+        ndkVersion = "27.0.12077973"
+        ...
+    }
+All projects evaluated.
+Task name matched 'assembleDebug'
+Selected primary task 'assembleDebug' from project :
+Starting process 'command 'C:\Program Files\Java\jdk-21\bin\java.exe''. Working directory: E:\AI\.gradle\.tmp\tmp-jvm13505387720269918613probe Command: C:\Program Files\Java\jdk-21\bin\java.exe -Xmx32m -Xms32m -cp . JavaProbe
+Successfully started process 'command 'C:\Program Files\Java\jdk-21\bin\java.exe''
+Received JVM installation metadata from 'C:\Program Files\Java\jdk-21': {JAVA_HOME=C:\Program Files\Java\jdk-21, JAVA_VERSION=21.0.8, JAVA_VENDOR=Oracle Corporation, RUNTIME_NAME=Java(TM) SE Runtime Environment, RUNTIME_VERSION=21.0.8+12-LTS-250, VM_NAME=Java HotSpot(TM) 64-Bit Server VM, VM_VERSION=21.0.8+12-LTS-250, VM_VENDOR=Oracle Corporation, OS_ARCH=amd64}
+Adding -Xuse-inline-scopes-numbers Kotlin compiler flag for task :app:compileDebugKotlin
+Tasks to be executed: [task ':app:DebugMinSdkCheck', task ':app:preBuild', task ':app:preDebugBuild', task ':app:mergeDebugNativeDebugMetadata', task ':app:checkKotlinGradlePluginConfigurationErrors', task ':app:compileFlutterBuildDebug', task ':app:packJniLibsflutterBuildDebug', task ':image_gallery_saver_plus:preBuild', task ':image_gallery_saver_plus:preDebugBuild', task ':image_gallery_saver_plus:writeDebugAarMetadata', task ':path_provider_android:preBuild', task ':path_provider_android:preDebugBuild', task ':path_provider_android:writeDebugAarMetadata', task ':permission_handler_android:preBuild', task ':permission_handler_android:preDebugBuild', task ':permission_handler_android:writeDebugAarMetadata', task ':printing:preBuild', task ':printing:preDebugBuild', task ':printing:writeDebugAarMetadata', task ':share_plus:preBuild', task ':share_plus:preDebugBuild', task ':share_plus:writeDebugAarMetadata', task ':shared_preferences_android:preBuild', task ':shared_preferences_android:preDebugBuild', task ':shared_preferences_android:writeDebugAarMetadata', task ':sqflite_android:preBuild', task ':sqflite_android:preDebugBuild', task ':sqflite_android:writeDebugAarMetadata', task ':webview_flutter_android:preBuild', task ':webview_flutter_android:preDebugBuild', task ':webview_flutter_android:writeDebugAarMetadata', task ':app:checkDebugAarMetadata', task ':app:cleanMergeDebugAssets', task ':app:mergeDebugShaders', task ':app:compileDebugShaders', task ':app:generateDebugAssets', task ':image_gallery_saver_plus:mergeDebugShaders', task ':image_gallery_saver_plus:compileDebugShaders', task ':image_gallery_saver_plus:generateDebugAssets', task ':image_gallery_saver_plus:mergeDebugAssets', task ':path_provider_android:mergeDebugShaders', task ':path_provider_android:compileDebugShaders', task ':path_provider_android:generateDebugAssets', task ':path_provider_android:mergeDebugAssets', task ':permission_handler_android:mergeDebugShaders', task ':permission_handler_android:compileDebugShaders', task ':permission_handler_android:generateDebugAssets', task ':permission_handler_android:mergeDebugAssets', task ':printing:mergeDebugShaders', task ':printing:compileDebugShaders', task ':printing:generateDebugAssets', task ':printing:mergeDebugAssets', task ':share_plus:mergeDebugShaders', task ':share_plus:compileDebugShaders', task ':share_plus:generateDebugAssets', task ':share_plus:mergeDebugAssets', task ':shared_preferences_android:mergeDebugShaders', task ':shared_preferences_android:compileDebugShaders', task ':shared_preferences_android:generateDebugAssets', task ':shared_preferences_android:mergeDebugAssets', task ':sqflite_android:mergeDebugShaders', task ':sqflite_android:compileDebugShaders', task ':sqflite_android:generateDebugAssets', task ':sqflite_android:mergeDebugAssets', task ':webview_flutter_android:mergeDebugShaders', task ':webview_flutter_android:compileDebugShaders', task ':webview_flutter_android:generateDebugAssets', task ':webview_flutter_android:mergeDebugAssets', task ':app:mergeDebugAssets', task ':app:copyFlutterAssetsDebug', task ':app:generateDebugResValues', task ':image_gallery_saver_plus:generateDebugResValues', task ':image_gallery_saver_plus:generateDebugResources', task ':image_gallery_saver_plus:packageDebugResources', task ':path_provider_android:generateDebugResValues', task ':path_provider_android:generateDebugResources', task ':path_provider_android:packageDebugResources', task ':permission_handler_android:generateDebugResValues', task ':permission_handler_android:generateDebugResources', task ':permission_handler_android:packageDebugResources', task ':printing:generateDebugResValues', task ':printing:generateDebugResources', task ':printing:packageDebugResources', task ':share_plus:generateDebugResValues', task ':share_plus:generateDebugResources', task ':share_plus:packageDebugResources', task ':shared_preferences_android:generateDebugResValues', task ':shared_preferences_android:generateDebugResources', task ':shared_preferences_android:packageDebugResources', task ':sqflite_android:generateDebugResValues', task ':sqflite_android:generateDebugResources', task ':sqflite_android:packageDebugResources', task ':webview_flutter_android:generateDebugResValues', task ':webview_flutter_android:generateDebugResources', task ':webview_flutter_android:packageDebugResources', task ':app:mapDebugSourceSetPaths', task ':app:generateDebugResources', task ':app:mergeDebugResources', task ':app:packageDebugResources', task ':app:parseDebugLocalResources', task ':app:createDebugCompatibleScreenManifests', task ':app:extractDeepLinksDebug', task ':image_gallery_saver_plus:extractDeepLinksDebug', task ':image_gallery_saver_plus:processDebugManifest', task ':path_provider_android:extractDeepLinksDebug', task ':path_provider_android:processDebugManifest', task ':permission_handler_android:extractDeepLinksDebug', task ':permission_handler_android:processDebugManifest', task ':printing:extractDeepLinksDebug', task ':printing:processDebugManifest', task ':share_plus:extractDeepLinksDebug', task ':share_plus:processDebugManifest', task ':shared_preferences_android:extractDeepLinksDebug', task ':shared_preferences_android:processDebugManifest', task ':sqflite_android:extractDeepLinksDebug', task ':sqflite_android:processDebugManifest', task ':webview_flutter_android:extractDeepLinksDebug', task ':webview_flutter_android:processDebugManifest', task ':app:processDebugMainManifest', task ':app:processDebugManifest', task ':app:processDebugManifestForPackage', task ':image_gallery_saver_plus:compileDebugLibraryResources', task ':image_gallery_saver_plus:parseDebugLocalResources', task ':image_gallery_saver_plus:generateDebugRFile', task ':path_provider_android:compileDebugLibraryResources', task ':path_provider_android:parseDebugLocalResources', task ':path_provider_android:generateDebugRFile', task ':permission_handler_android:compileDebugLibraryResources', task ':permission_handler_android:parseDebugLocalResources', task ':permission_handler_android:generateDebugRFile', task ':printing:compileDebugLibraryResources', task ':printing:parseDebugLocalResources', task ':printing:generateDebugRFile', task ':share_plus:compileDebugLibraryResources', task ':share_plus:parseDebugLocalResources', task ':share_plus:generateDebugRFile', task ':shared_preferences_android:compileDebugLibraryResources', task ':shared_preferences_android:parseDebugLocalResources', task ':shared_preferences_android:generateDebugRFile', task ':sqflite_android:compileDebugLibraryResources', task ':sqflite_android:parseDebugLocalResources', task ':sqflite_android:generateDebugRFile', task ':webview_flutter_android:compileDebugLibraryResources', task ':webview_flutter_android:parseDebugLocalResources', task ':webview_flutter_android:generateDebugRFile', task ':app:processDebugResources', task ':image_gallery_saver_plus:checkKotlinGradlePluginConfigurationErrors', task ':image_gallery_saver_plus:compileDebugKotlin', task ':image_gallery_saver_plus:javaPreCompileDebug', task ':image_gallery_saver_plus:compileDebugJavaWithJavac', task ':image_gallery_saver_plus:bundleLibCompileToJarDebug', task ':path_provider_android:javaPreCompileDebug', task ':path_provider_android:compileDebugJavaWithJavac', task ':path_provider_android:bundleLibCompileToJarDebug', task ':permission_handler_android:javaPreCompileDebug', task ':permission_handler_android:compileDebugJavaWithJavac', task ':permission_handler_android:bundleLibCompileToJarDebug', task ':printing:javaPreCompileDebug', task ':printing:compileDebugJavaWithJavac', task ':printing:bundleLibCompileToJarDebug', task ':share_plus:checkKotlinGradlePluginConfigurationErrors', task ':share_plus:compileDebugKotlin', task ':share_plus:javaPreCompileDebug', task ':share_plus:compileDebugJavaWithJavac', task ':share_plus:bundleLibCompileToJarDebug', task ':shared_preferences_android:checkKotlinGradlePluginConfigurationErrors', task ':shared_preferences_android:compileDebugKotlin', task ':shared_preferences_android:javaPreCompileDebug', task ':shared_preferences_android:compileDebugJavaWithJavac', task ':shared_preferences_android:bundleLibCompileToJarDebug', task ':sqflite_android:javaPreCompileDebug', task ':sqflite_android:compileDebugJavaWithJavac', task ':sqflite_android:bundleLibCompileToJarDebug', task ':webview_flutter_android:checkKotlinGradlePluginConfigurationErrors', task ':webview_flutter_android:compileDebugKotlin', task ':webview_flutter_android:javaPreCompileDebug', task ':webview_flutter_android:compileDebugJavaWithJavac', task ':webview_flutter_android:bundleLibCompileToJarDebug', task ':app:compileDebugKotlin', task ':app:javaPreCompileDebug', task ':app:compileDebugJavaWithJavac', task ':app:compressDebugAssets', task ':image_gallery_saver_plus:bundleLibRuntimeToJarDebug', task ':path_provider_android:bundleLibRuntimeToJarDebug', task ':permission_handler_android:bundleLibRuntimeToJarDebug', task ':printing:bundleLibRuntimeToJarDebug', task ':share_plus:bundleLibRuntimeToJarDebug', task ':shared_preferences_android:bundleLibRuntimeToJarDebug', task ':sqflite_android:bundleLibRuntimeToJarDebug', task ':webview_flutter_android:bundleLibRuntimeToJarDebug', task ':app:desugarDebugFileDependencies', task ':app:dexBuilderDebug', task ':app:mergeDebugGlobalSynthetics', task ':app:processDebugJavaRes', task ':image_gallery_saver_plus:processDebugJavaRes', task ':path_provider_android:processDebugJavaRes', task ':permission_handler_android:processDebugJavaRes', task ':printing:processDebugJavaRes', task ':share_plus:processDebugJavaRes', task ':shared_preferences_android:processDebugJavaRes', task ':sqflite_android:processDebugJavaRes', task ':webview_flutter_android:processDebugJavaRes', task ':app:mergeDebugJavaResource', task ':app:checkDebugDuplicateClasses', task ':app:mergeExtDexDebug', task ':image_gallery_saver_plus:bundleLibRuntimeToDirDebug', task ':path_provider_android:bundleLibRuntimeToDirDebug', task ':permission_handler_android:bundleLibRuntimeToDirDebug', task ':printing:bundleLibRuntimeToDirDebug', task ':share_plus:bundleLibRuntimeToDirDebug', task ':shared_preferences_android:bundleLibRuntimeToDirDebug', task ':sqflite_android:bundleLibRuntimeToDirDebug', task ':webview_flutter_android:bundleLibRuntimeToDirDebug', task ':app:mergeLibDexDebug', task ':app:mergeProjectDexDebug', task ':app:configureCMakeDebug[arm64-v8a]', task ':app:buildCMakeDebug[arm64-v8a]', task ':app:configureCMakeDebug[armeabi-v7a]', task ':app:buildCMakeDebug[armeabi-v7a]', task ':app:configureCMakeDebug[x86_64]', task ':app:buildCMakeDebug[x86_64]', task ':app:mergeDebugJniLibFolders', task ':image_gallery_saver_plus:mergeDebugJniLibFolders', task ':image_gallery_saver_plus:mergeDebugNativeLibs', task ':image_gallery_saver_plus:copyDebugJniLibsProjectOnly', task ':path_provider_android:mergeDebugJniLibFolders', task ':path_provider_android:mergeDebugNativeLibs', task ':path_provider_android:copyDebugJniLibsProjectOnly', task ':permission_handler_android:mergeDebugJniLibFolders', task ':permission_handler_android:mergeDebugNativeLibs', task ':permission_handler_android:copyDebugJniLibsProjectOnly', task ':printing:mergeDebugJniLibFolders', task ':printing:mergeDebugNativeLibs', task ':printing:copyDebugJniLibsProjectOnly', task ':share_plus:mergeDebugJniLibFolders', task ':share_plus:mergeDebugNativeLibs', task ':share_plus:copyDebugJniLibsProjectOnly', task ':shared_preferences_android:mergeDebugJniLibFolders', task ':shared_preferences_android:mergeDebugNativeLibs', task ':shared_preferences_android:copyDebugJniLibsProjectOnly', task ':sqflite_android:mergeDebugJniLibFolders', task ':sqflite_android:mergeDebugNativeLibs', task ':sqflite_android:copyDebugJniLibsProjectOnly', task ':webview_flutter_android:mergeDebugJniLibFolders', task ':webview_flutter_android:mergeDebugNativeLibs', task ':webview_flutter_android:copyDebugJniLibsProjectOnly', task ':app:mergeDebugNativeLibs', task ':app:stripDebugDebugSymbols', task ':app:validateSigningDebug', task ':app:writeDebugAppMetadata', task ':app:writeDebugSigningConfigVersions', task ':app:packageDebug', task ':app:createDebugApkListingFileRedirect', task ':app:assembleDebug', task ':image_gallery_saver_plus:stripDebugDebugSymbols', task ':image_gallery_saver_plus:copyDebugJniLibsProjectAndLocalJars', task ':image_gallery_saver_plus:extractDebugAnnotations', task ':image_gallery_saver_plus:extractDeepLinksForAarDebug', task ':image_gallery_saver_plus:mergeDebugGeneratedProguardFiles', task ':image_gallery_saver_plus:mergeDebugConsumerProguardFiles', task ':image_gallery_saver_plus:prepareDebugArtProfile', task ':image_gallery_saver_plus:prepareLintJarForPublish', task ':image_gallery_saver_plus:mergeDebugJavaResource', task ':image_gallery_saver_plus:syncDebugLibJars', task ':image_gallery_saver_plus:bundleDebugAar', task ':image_gallery_saver_plus:assembleDebug', task ':path_provider_android:stripDebugDebugSymbols', task ':path_provider_android:copyDebugJniLibsProjectAndLocalJars', task ':path_provider_android:extractDebugAnnotations', task ':path_provider_android:extractDeepLinksForAarDebug', task ':path_provider_android:mergeDebugGeneratedProguardFiles', task ':path_provider_android:mergeDebugConsumerProguardFiles', task ':path_provider_android:prepareDebugArtProfile', task ':path_provider_android:prepareLintJarForPublish', task ':path_provider_android:mergeDebugJavaResource', task ':path_provider_android:syncDebugLibJars', task ':path_provider_android:bundleDebugAar', task ':path_provider_android:assembleDebug', task ':permission_handler_android:stripDebugDebugSymbols', task ':permission_handler_android:copyDebugJniLibsProjectAndLocalJars', task ':permission_handler_android:extractDebugAnnotations', task ':permission_handler_android:extractDeepLinksForAarDebug', task ':permission_handler_android:mergeDebugGeneratedProguardFiles', task ':permission_handler_android:mergeDebugConsumerProguardFiles', task ':permission_handler_android:prepareDebugArtProfile', task ':permission_handler_android:prepareLintJarForPublish', task ':permission_handler_android:mergeDebugJavaResource', task ':permission_handler_android:syncDebugLibJars', task ':permission_handler_android:bundleDebugAar', task ':permission_handler_android:assembleDebug', task ':printing:stripDebugDebugSymbols', task ':printing:copyDebugJniLibsProjectAndLocalJars', task ':printing:extractDebugAnnotations', task ':printing:extractDeepLinksForAarDebug', task ':printing:mergeDebugGeneratedProguardFiles', task ':printing:mergeDebugConsumerProguardFiles', task ':printing:prepareDebugArtProfile', task ':printing:prepareLintJarForPublish', task ':printing:mergeDebugJavaResource', task ':printing:syncDebugLibJars', task ':printing:bundleDebugAar', task ':printing:assembleDebug', task ':share_plus:stripDebugDebugSymbols', task ':share_plus:copyDebugJniLibsProjectAndLocalJars', task ':share_plus:extractDebugAnnotations', task ':share_plus:extractDeepLinksForAarDebug', task ':share_plus:mergeDebugGeneratedProguardFiles', task ':share_plus:mergeDebugConsumerProguardFiles', task ':share_plus:prepareDebugArtProfile', task ':share_plus:prepareLintJarForPublish', task ':share_plus:mergeDebugJavaResource', task ':share_plus:syncDebugLibJars', task ':share_plus:bundleDebugAar', task ':share_plus:assembleDebug', task ':shared_preferences_android:stripDebugDebugSymbols', task ':shared_preferences_android:copyDebugJniLibsProjectAndLocalJars', task ':shared_preferences_android:extractDebugAnnotations', task ':shared_preferences_android:extractDeepLinksForAarDebug', task ':shared_preferences_android:mergeDebugGeneratedProguardFiles', task ':shared_preferences_android:mergeDebugConsumerProguardFiles', task ':shared_preferences_android:prepareDebugArtProfile', task ':shared_preferences_android:prepareLintJarForPublish', task ':shared_preferences_android:mergeDebugJavaResource', task ':shared_preferences_android:syncDebugLibJars', task ':shared_preferences_android:bundleDebugAar', task ':shared_preferences_android:assembleDebug', task ':sqflite_android:stripDebugDebugSymbols', task ':sqflite_android:copyDebugJniLibsProjectAndLocalJars', task ':sqflite_android:extractDebugAnnotations', task ':sqflite_android:extractDeepLinksForAarDebug', task ':sqflite_android:mergeDebugGeneratedProguardFiles', task ':sqflite_android:mergeDebugConsumerProguardFiles', task ':sqflite_android:prepareDebugArtProfile', task ':sqflite_android:prepareLintJarForPublish', task ':sqflite_android:mergeDebugJavaResource', task ':sqflite_android:syncDebugLibJars', task ':sqflite_android:bundleDebugAar', task ':sqflite_android:assembleDebug', task ':webview_flutter_android:stripDebugDebugSymbols', task ':webview_flutter_android:copyDebugJniLibsProjectAndLocalJars', task ':webview_flutter_android:extractDebugAnnotations', task ':webview_flutter_android:extractDeepLinksForAarDebug', task ':webview_flutter_android:mergeDebugGeneratedProguardFiles', task ':webview_flutter_android:mergeDebugConsumerProguardFiles', task ':webview_flutter_android:prepareDebugArtProfile', task ':webview_flutter_android:prepareLintJarForPublish', task ':webview_flutter_android:mergeDebugJavaResource', task ':webview_flutter_android:syncDebugLibJars', task ':webview_flutter_android:bundleDebugAar', task ':webview_flutter_android:assembleDebug']
+Tasks that were excluded: []
+work action Parameters of IdentityTransform (Thread[Execution worker Thread 2,5,main]) started.
+work action Parameters of DexingNoClasspathTransform (Thread[Execution worker Thread 2,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[Execution worker Thread 2,5,main]) started.
+work action Parameters of ClassesDirToClassesTransform (Thread[Execution worker Thread 2,5,main]) started.
+work action Parameters of DexingOutputSplitTransform (Thread[Execution worker Thread 2,5,main]) started.
+Resolve mutations for :app:DebugMinSdkCheck (Thread[Execution worker Thread 2,5,main]) started.
+:app:DebugMinSdkCheck (Thread[Execution worker Thread 2,5,main]) started.
+Invalidating in-memory cache of E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\android\.gradle\8.12\executionHistory\executionHistory.bin
+
+> Task :app:DebugMinSdkCheck
+Caching disabled for task ':app:DebugMinSdkCheck' because:
+  Build cache is disabled
+Task ':app:DebugMinSdkCheck' is not up-to-date because:
+  Task has not declared any outputs despite executing actions.
+Resolve mutations for :app:preBuild (Thread[Execution worker Thread 2,5,main]) started.
+:app:preBuild (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:preBuild UP-TO-DATE
+Skipping task ':app:preBuild' as it has no actions.
+Resolve mutations for :app:preDebugBuild (Thread[Execution worker Thread 2,5,main]) started.
+:app:preDebugBuild (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:preDebugBuild UP-TO-DATE
+Skipping task ':app:preDebugBuild' as it has no actions.
+Resolve mutations for :app:mergeDebugNativeDebugMetadata (Thread[Execution worker Thread 2,5,main]) started.
+:app:mergeDebugNativeDebugMetadata (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+Skipping task ':app:mergeDebugNativeDebugMetadata' as it has no source files and no previous output files.
+Resolve mutations for :app:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 2,5,main]) started.
+:app:checkKotlinGradlePluginConfigurationErrors (Thread[Execution worker Thread 2,5,main]) started.
+
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+Skipping task ':app:checkKotlinGradlePluginConfigurationErrors' as task onlyIf 'errorDiagnostics are present' is false.
+Resolve mutations for :app:compileFlutterBuildDebug (Thread[Execution worker Thread 3,5,main]) started.
+:app:compileFlutterBuildDebug (Thread[Execution worker Thread 3,5,main]) started.
+
+> Task :app:compileFlutterBuildDebug
+Caching disabled for task ':app:compileFlutterBuildDebug' because:
+  Build cache is disabled
+  Caching has not been enabled for the task
+Task ':app:compileFlutterBuildDebug' is not up-to-date because:
+  Value of input property 'dartDefines' has changed for task ':app:compileFlutterBuildDebug'
+  Value of input property 'fileSystemScheme' has changed for task ':app:compileFlutterBuildDebug'
+  Value of input property 'targetPath' has changed for task ':app:compileFlutterBuildDebug'
+  and more...
+Starting process 'command 'E:\Tech\Flutter\src\flutter\bin\flutter.bat''. Working directory: E:\Tech\Flutter\src\Myfakebook\myfakebook_manager Command: E:\Tech\Flutter\src\flutter\bin\flutter.bat --quiet assemble --no-version-check --depfile E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\build\app\intermediates\flutter\debug/flutter_build.d --output E:\Tech\Flutter\src\Myfakebook\myfakebook_manager\build\app\intermediates\flutter\debug -dTargetFile=lib/main.dart -dTargetPlatform=android -dBuildMode=debug -dTrackWidgetCreation=true -dFlavor= -dAndroidArchs=android-arm android-arm64 android-x64 -dMinSdkVersion=24 debug_android_application
+Successfully started process 'command 'E:\Tech\Flutter\src\flutter\bin\flutter.bat''

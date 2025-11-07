@@ -5,6 +5,7 @@
 import FlutterMacOS
 import Foundation
 
+import gal
 import path_provider_foundation
 import printing
 import share_plus
@@ -13,6 +14,7 @@ import sqflite_darwin
 import webview_flutter_wkwebview
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  GalPlugin.register(with: registry.registrar(forPlugin: "GalPlugin"))
   PathProviderPlugin.register(with: registry.registrar(forPlugin: "PathProviderPlugin"))
   PrintingPlugin.register(with: registry.registrar(forPlugin: "PrintingPlugin"))
   SharePlusMacosPlugin.register(with: registry.registrar(forPlugin: "SharePlusMacosPlugin"))

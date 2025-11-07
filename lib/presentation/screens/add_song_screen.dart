@@ -5,6 +5,7 @@ import '../../data/models/section.dart';
 import '../../data/models/measure.dart';
 import '../../data/services/database_helper.dart';
 import '../providers/song_provider.dart';
+import '../providers/repertoire_provider.dart';
 import '../providers/theme_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
@@ -13,8 +14,9 @@ import '../../core/theme/app_colors.dart';
 /// Screen for adding or editing a song
 class AddSongScreen extends StatefulWidget {
   final Song? song;
+  final int? repertoireId;
 
-  const AddSongScreen({super.key, this.song});
+  const AddSongScreen({super.key, this.song, this.repertoireId});
 
   @override
   State<AddSongScreen> createState() => _AddSongScreenState();
@@ -310,6 +312,17 @@ class _AddSongScreenState extends State<AddSongScreen> {
     if (songId != null) {
       final songProvider = Provider.of<SongProvider>(context, listen: false);
       await songProvider.loadSongs();
+
+      // If repertoireId is provided, add the song to the repertoire
+      if (widget.repertoireId != null) {
+        final repertoireProvider = Provider.of<RepertoireProvider>(
+          context,
+          listen: false,
+        );
+        await repertoireProvider.addSongsToRepertoire(widget.repertoireId!, [
+          songId,
+        ]);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

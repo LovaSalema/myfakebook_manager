@@ -4,6 +4,8 @@ import 'package:image/image.dart' as img;
 import 'package:screenshot/screenshot.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:gal/gal.dart';
 import '../models/song.dart';
 import '../models/section.dart';
 import '../models/measure.dart';
@@ -499,6 +501,52 @@ class ImageExportService {
       ], text: 'Chord Sheet Export');
     } catch (e) {
       print('Error sharing image: $e');
+    }
+  }
+
+  /// Share image bytes using share_plus
+  static Future<void> shareImageBytes(
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    try {
+      final xFile = XFile.fromData(
+        imageBytes,
+        name: fileName,
+        mimeType: 'image/png',
+      );
+      await Share.shareXFiles([xFile], text: 'Chord Sheet Export');
+    } catch (e) {
+      print('Error sharing image bytes: $e');
+    }
+  }
+
+  /// Save image to device gallery
+  static Future<bool> saveImageToGallery(
+    Uint8List imageBytes,
+    String fileName,
+  ) async {
+    print(
+      'DEBUG: saveImageToGallery called with fileName: $fileName, imageBytes length: ${imageBytes.length}',
+    );
+    try {
+      // Request storage permission
+      print('DEBUG: Requesting storage permission');
+      final status = await Permission.storage.request();
+      print('DEBUG: Permission status: $status');
+      if (!status.isGranted) {
+        print('DEBUG: Storage permission denied');
+        return false;
+      }
+
+      // Save to gallery using gal
+      print('DEBUG: Saving image to gallery with Gal');
+      await Gal.putImageBytes(imageBytes, album: "ChordSheets");
+      print('DEBUG: Image saved successfully to gallery');
+      return true;
+    } catch (e) {
+      print('DEBUG: Error saving image to gallery: $e');
+      return false;
     }
   }
 
