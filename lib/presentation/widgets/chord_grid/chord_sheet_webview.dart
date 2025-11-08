@@ -95,7 +95,7 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: double.infinity, // Full width
-        padding: const EdgeInsets.all(8), // Réduit de 20 à 8
+        padding: const EdgeInsets.all(4), // Réduit de 20 à 8
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -105,7 +105,7 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
           children: [
             Padding(
               padding: const EdgeInsets.only(
-                left: 4,
+                left: 2,
                 bottom: 8,
               ), // Padding minimal pour le titre
               // child: Text(

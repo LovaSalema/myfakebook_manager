@@ -28,14 +28,14 @@ class HtmlChordSheetService {
         body {
             font-family: 'Courier New', monospace;
             background-color: #f5f5f5;
-            padding: 20px;
+            padding: 10px;
         }
         
         .container {
             max-width: 900px;
             margin: 0 auto;
             background-color: white;
-            padding: 40px;
+            padding: 20px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
@@ -43,24 +43,32 @@ class HtmlChordSheetService {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             padding-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .header-left {
+            flex: 1;
+            min-width: 200px;
         }
         
         .header-left h1 {
-            font-size: 28px;
+            font-size: clamp(20px, 4vw, 28px);
             font-weight: bold;
             margin-bottom: 5px;
+            word-wrap: break-word;
         }
         
         .header-left .meta {
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
             color: #666;
         }
         
         .header-right {
             text-align: right;
-            font-size: 14px;
+            font-size: clamp(12px, 2.5vw, 14px);
         }
         
         .tempo {
@@ -69,16 +77,16 @@ class HtmlChordSheetService {
         }
         
         .key {
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
         }
         
         .section {
-            margin: 25px 0;
+            margin: 15px 0;
         }
         
         .section-group {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
             width: 100%;
             gap: 5px;
             border-left: 2px solid #000;
@@ -86,12 +94,13 @@ class HtmlChordSheetService {
         
         .section-title {
             font-weight: bold;
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
             margin-bottom: 10px;
             border: 2px solid #000;
             padding: 5px 8px;
             display: inline-block;
             background-color: #fff;
+            word-wrap: break-word;
         }
         
         .chord-block {
@@ -104,13 +113,9 @@ class HtmlChordSheetService {
             padding: 8px;
             border-right: 2px solid #000;
             min-height: 60px;
-            font-size: 13px;
+            font-size: clamp(11px, 2.2vw, 13px);
             font-weight: bold;
             font-family: 'Courier New', monospace;
-        }
-        
-        .chord-block:nth-child(3n) {
-            border-right: 2px solid #000;
         }
         
         .chord {
@@ -121,15 +126,20 @@ class HtmlChordSheetService {
             background-color: #f8f9fa;
             border-radius: 3px;
             border: 1px solid #e9ecef;
+            font-size: clamp(11px, 2.2vw, 13px);
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .volta-numbers {
-            font-size: 12px;
+            font-size: clamp(10px, 2vw, 12px);
             display: flex;
-            gap: 60px;
+            gap: 30px;
             margin-top: -5px;
             margin-bottom: 5px;
             margin-left: 10px;
+            flex-wrap: wrap;
         }
         
         .volta {
@@ -140,18 +150,19 @@ class HtmlChordSheetService {
         }
         
         .coda-symbol {
-            font-size: 20px;
+            font-size: clamp(16px, 3.5vw, 20px);
             font-weight: bold;
             margin-bottom: 5px;
         }
         
         .footer {
-            margin-top: 40px;
-            font-size: 10px;
+            margin-top: 30px;
+            font-size: clamp(8px, 1.8vw, 10px);
             color: #999;
             text-align: center;
             border-top: 1px solid #ddd;
             padding-top: 10px;
+            word-wrap: break-word;
         }
 
         /* Repeat marks */
@@ -159,12 +170,79 @@ class HtmlChordSheetService {
             content: '𝄐';
             display: inline-block;
             margin-right: 10px;
+            font-size: clamp(14px, 3vw, 18px);
         }
 
         .repeat-close::after {
             content: '𝄑';
             display: inline-block;
             margin-left: 10px;
+            font-size: clamp(14px, 3vw, 18px);
+        }
+
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .section-group {
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+            }
+            
+            .chord-block {
+                min-height: 50px;
+                padding: 6px;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 3px;
+            }
+            
+            .container {
+                padding: 12px;
+            }
+            
+            .header {
+                margin-bottom: 15px;
+            }
+            
+            .section {
+                margin: 12px 0;
+            }
+            
+            .section-group {
+                grid-template-columns: repeat(auto-fit, minmax(min(100%, 100px), 1fr));
+            }
+            
+            .chord-block {
+                min-height: 45px;
+                padding: 5px;
+                gap: 3px;
+            }
+            
+            .footer {
+                margin-top: 20px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                padding: 0;
+                background-color: white;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 20px;
+            }
         }
     </style>
 </head>
