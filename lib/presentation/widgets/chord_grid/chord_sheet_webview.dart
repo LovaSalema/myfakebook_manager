@@ -7,17 +7,26 @@ import '../../../data/services/html_chord_sheet_service.dart';
 /// WebView widget for displaying chord sheet HTML
 class ChordSheetWebView extends StatefulWidget {
   final Song song;
+  final bool forExport;
 
-  const ChordSheetWebView({super.key, required this.song});
+  const ChordSheetWebView({
+    super.key,
+    required this.song,
+    this.forExport = false,
+  });
 
   @override
-  State<ChordSheetWebView> createState() => _ChordSheetWebViewState();
+  State<ChordSheetWebView> createState() => ChordSheetWebViewState();
 }
 
-class _ChordSheetWebViewState extends State<ChordSheetWebView> {
+class ChordSheetWebViewState extends State<ChordSheetWebView> {
   late final WebViewController _controller;
   bool _isLoading = true;
   bool _hasError = false;
+  final ScreenshotController screenshotController = ScreenshotController();
+
+  // Getter to expose the controller
+  ScreenshotController get controller => screenshotController;
 
   @override
   void initState() {
@@ -32,6 +41,7 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
       );
       final htmlContent = HtmlChordSheetService.generateChordSheetHtml(
         widget.song,
+        forExport: widget.forExport,
       );
       print(
         'DEBUG: HTML content generated successfully, length: ${htmlContent.length}',
@@ -50,7 +60,9 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
               });
             },
             onPageFinished: (String url) {
-              print('DEBUG: WebView page finished loading: $url');
+              print(
+                'DEBUG: WebView page finished loading: $url (forExport: ${widget.forExport})',
+              );
               setState(() {
                 _isLoading = false;
               });
@@ -86,9 +98,25 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
   @override
   Widget build(BuildContext context) {
     print(
-      'DEBUG: ChordSheetWebView.build() called - _hasError: $_hasError, _isLoading: $_isLoading',
+      'DEBUG: ChordSheetWebView.build() called - _hasError: $_hasError, _isLoading: $_isLoading, forExport: ${widget.forExport}',
     );
 
+    // For export, return just the WebView without Card/padding
+    if (widget.forExport) {
+      print(
+        'DEBUG: Building export WebView widget - _isLoading: $_isLoading, _hasError: $_hasError',
+      );
+      return Container(
+        width: double.infinity,
+        height: 500,
+        color: Colors.white,
+        child: _hasError
+            ? _buildErrorState()
+            : ExcludeSemantics(child: WebViewWidget(controller: _controller)),
+      );
+    }
+
+    // Normal display with Card and padding
     return Card(
       elevation: 2,
       margin: EdgeInsets.zero, // Remove card margins for full width
@@ -117,30 +145,37 @@ class _ChordSheetWebViewState extends State<ChordSheetWebView> {
               // ),
               // ),
             ),
-            Container(
-              width: double.infinity, // Full width
-              height: 500,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Stack(
-                  children: [
-                    Container(
-                      width: double.infinity,
-                      height: 500,
-                      child: _hasError
-                          ? _buildErrorState()
-                          : ExcludeSemantics(
-                              child: WebViewWidget(controller: _controller),
-                            ),
-                    ),
-                    if (_isLoading)
+            // Wrap ONLY the WebView content with Screenshot
+            Screenshot(
+              controller: screenshotController,
+              child: Container(
+                width: double.infinity, // Full width
+                height: 500,
+                color: Colors.white, // Ensure white background
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Stack(
+                    children: [
                       Container(
                         width: double.infinity,
                         height: 500,
-                        color: Colors.white,
-                        child: const Center(child: CircularProgressIndicator()),
+                        child: _hasError
+                            ? _buildErrorState()
+                            : ExcludeSemantics(
+                                child: WebViewWidget(controller: _controller),
+                              ),
                       ),
-                  ],
+                      if (_isLoading)
+                        Container(
+                          width: double.infinity,
+                          height: 500,
+                          color: Colors.white,
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),

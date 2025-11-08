@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:screenshot/screenshot.dart';
 import '../../data/models/song.dart';
 import '../../data/models/section.dart';
 import '../../data/models/measure.dart';
@@ -11,11 +9,8 @@ import '../providers/theme_provider.dart';
 import '../providers/repertoire_provider.dart';
 import '../providers/export_provider.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../../core/theme/app_colors.dart';
-import '../../data/services/database_helper.dart';
 import '../../data/services/image_export_service.dart';
 import '../../core/services/metronome_service.dart';
-import '../widgets/chord_grid/chord_sheet_template.dart';
 import '../widgets/chord_grid/chord_sheet_webview.dart';
 import 'add_song_screen.dart';
 
@@ -555,7 +550,8 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   late Song _song;
   bool _isLoading = true;
   final bool _showExportOptions = false;
-  final ScreenshotController _screenshotController = ScreenshotController();
+  final GlobalKey<ChordSheetWebViewState> _webViewKey =
+      GlobalKey<ChordSheetWebViewState>();
   final MetronomeService _metronomeService = MetronomeService();
   bool _isMetronomePlaying = false;
 
@@ -941,12 +937,9 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   SliverToBoxAdapter _buildChordGridTemplate() {
     print('DEBUG: _buildChordGridTemplate() called - Always using WebView');
     return SliverToBoxAdapter(
-      child: Screenshot(
-        controller: _screenshotController,
-        child: ChordSheetWebView(
-          key: ValueKey('webview_${_song.id}'),
-          song: _song,
-        ),
+      child: ChordSheetWebView(
+        key: _webViewKey,
+        song: _song,
       ).animate().fadeIn(delay: 200.ms),
     );
   }
@@ -1308,13 +1301,29 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   /// Capture screenshot and export as image
   Future<void> _captureAndExportImage(String format) async {
     try {
-      print('Capturing screenshot for format: $format');
+      print('DEBUG: Capturing screenshot for format: $format');
 
-      // Capture the screenshot
-      final imageBytes = await _screenshotController.capture();
+      // Wait for WebView to be fully rendered
+      await Future.delayed(Duration(milliseconds: 500));
+      await WidgetsBinding.instance.endOfFrame;
+
+      // Get the screenshot controller from the WebView
+      final webViewState = _webViewKey.currentState;
+      if (webViewState == null) {
+        print('DEBUG: WebView state is null');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur: WebView non initialisée')),
+        );
+        return;
+      }
+
+      // Capture the screenshot using WebView's controller
+      final imageBytes = await webViewState.controller.capture(
+        pixelRatio: 3.0, // High quality
+      );
 
       if (imageBytes == null) {
-        print('Failed to capture screenshot');
+        print('DEBUG: Failed to capture screenshot');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Erreur lors de la capture de l\'écran'),
@@ -1322,6 +1331,10 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         );
         return;
       }
+
+      print(
+        'DEBUG: Screenshot captured successfully, size: ${imageBytes.length} bytes',
+      );
 
       // Generate file name
       final fileName =
@@ -1357,13 +1370,29 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
   /// Capture screenshot and share as image
   Future<void> _captureAndShareImage() async {
     try {
-      print('Capturing screenshot for sharing');
+      print('DEBUG: Capturing screenshot for sharing');
 
-      // Capture the screenshot
-      final imageBytes = await _screenshotController.capture();
+      // Wait for WebView to be fully rendered
+      await Future.delayed(Duration(milliseconds: 500));
+      await WidgetsBinding.instance.endOfFrame;
+
+      // Get the screenshot controller from the WebView
+      final webViewState = _webViewKey.currentState;
+      if (webViewState == null) {
+        print('DEBUG: WebView state is null');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erreur: WebView non initialisée')),
+        );
+        return;
+      }
+
+      // Capture the screenshot using WebView's controller
+      final imageBytes = await webViewState.controller.capture(
+        pixelRatio: 3.0, // High quality
+      );
 
       if (imageBytes == null) {
-        print('Failed to capture screenshot');
+        print('DEBUG: Failed to capture screenshot - imageBytes is null');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Erreur lors de la capture de l\'écran'),
@@ -1371,6 +1400,15 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
         );
         return;
       }
+
+      print('DEBUG: Screenshot captured successfully');
+      print('DEBUG: Image bytes length: ${imageBytes.length}');
+      print(
+        'DEBUG: This image likely includes Card padding/borders and HTML body padding',
+      );
+      print(
+        'DEBUG: Expected content area should be smaller than captured area',
+      );
 
       // Generate file name
       final fileName = '${_song.title.replaceAll(' ', '_')}_chord_sheet.png';
@@ -1380,7 +1418,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
 
       // Note: No snackbar needed for sharing as the share sheet handles feedback
     } catch (e) {
-      print('Error capturing and sharing image: $e');
+      print('DEBUG: Error capturing and sharing image: $e');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Erreur lors du partage: $e')));

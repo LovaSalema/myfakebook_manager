@@ -5,12 +5,12 @@ import '../../data/models/measure.dart';
 /// Service to generate HTML chord sheet from Song data
 class HtmlChordSheetService {
   /// Generates a complete HTML chord sheet from Song data
-  static String generateChordSheetHtml(Song song) {
-    final htmlContent = _buildHtmlTemplate(song);
+  static String generateChordSheetHtml(Song song, {bool forExport = false}) {
+    final htmlContent = _buildHtmlTemplate(song, forExport: forExport);
     return htmlContent;
   }
 
-  static String _buildHtmlTemplate(Song song) {
+  static String _buildHtmlTemplate(Song song, {bool forExport = false}) {
     return '''
 <!DOCTYPE html>
 <html lang="en">
@@ -27,16 +27,16 @@ class HtmlChordSheetService {
         
         body {
             font-family: 'Courier New', monospace;
-            background-color: #f5f5f5;
-            padding: 10px;
+            background-color: ${forExport ? '#ffffff' : '#f5f5f5'};
+            padding: ${forExport ? '0px' : '10px'};
         }
         
         .container {
             max-width: 900px;
             margin: 0 auto;
             background-color: white;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: ${forExport ? '0px' : '20px'};
+            box-shadow: ${forExport ? 'none' : '0 2px 10px rgba(0,0,0,0.1)'};
         }
         
         .header {
@@ -238,12 +238,27 @@ class HtmlChordSheetService {
                 padding: 0;
                 background-color: white;
             }
-            
+
             .container {
                 box-shadow: none;
                 padding: 20px;
             }
         }
+
+        /* Export styles */
+        ${forExport ? '''
+        @media screen {
+            body {
+                padding: 0 !important;
+                background-color: white !important;
+            }
+
+            .container {
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+        }
+        ''' : ''}
     </style>
 </head>
 <body>
