@@ -18,6 +18,7 @@ import 'add_song_screen.dart';
 import 'add_repertoire_screen.dart';
 import 'repertoire_detail_screen.dart';
 import 'settings_screen.dart';
+import 'extract_song_screen.dart';
 
 /// Professional HomeScreen for Chord Charts application
 class HomeScreen extends StatefulWidget {
@@ -765,9 +766,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _createNewSong() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => const AddSongScreen()));
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Créer une nouvelle chanson'),
+          content: const Text('Comment souhaitez-vous créer votre chanson ?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const AddSongScreen(),
+                  ),
+                );
+              },
+              child: const Text('Écrire les accords'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const ExtractSongScreen(),
+                  ),
+                );
+              },
+              child: const Text('Extraire par audio ou URL'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   /// Initialise les données de test
