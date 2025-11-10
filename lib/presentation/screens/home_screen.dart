@@ -443,10 +443,10 @@ class _HomeScreenState extends State<HomeScreen> {
               textAlign: TextAlign.center,
             ),
             SizedBox(height: 24.h),
-            FilledButton(
-              onPressed: _createNewRepertoire,
-              child: const Text('Créer un répertoire'),
-            ),
+            // FilledButton(
+            //   onPressed: _createNewRepertoire,
+            //   child: const Text('Créer un répertoire'),
+            // ),
           ],
         ),
       ),
@@ -580,10 +580,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 24.h),
-                FilledButton(
-                  onPressed: _createNewSong,
-                  child: const Text('Commencer'),
-                ),
+                // FilledButton(
+                //   onPressed: _createNewSong,
+                //   child: const Text('Commencer'),
+                // ),
               ],
             ),
           ),
