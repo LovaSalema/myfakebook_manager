@@ -34,14 +34,14 @@ class _AddSongScreenState extends State<AddSongScreen> {
     'C',
     'C#',
     'D',
-    'Eb',
+    'E♭',
     'E',
     'F',
     'F#',
     'G',
-    'Ab',
+    'A♭',
     'A',
-    'Bb',
+    'B♭',
     'B',
   ];
   String _selectedKey = 'C';
