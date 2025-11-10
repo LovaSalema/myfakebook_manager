@@ -10,6 +10,7 @@ import '../providers/theme_provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
+import '../widgets/chord_input_widget.dart';
 
 /// Screen for adding or editing a song
 class AddSongScreen extends StatefulWidget {
@@ -796,32 +797,12 @@ class _AddSongScreenState extends State<AddSongScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText:
-                  'Entrez les accords séparés par des espaces (ex: I V VI IV)',
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 16,
-                vertical: 12,
-              ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(4),
-                borderSide: BorderSide(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                ),
-              ),
-            ),
-            style: AppTextStyles.bodyMedium.copyWith(
-              fontWeight: FontWeight.w500,
-            ),
-            onChanged: (value) {
+          ChordInputWidget(
+            initialText: controller.text,
+            hintText:
+                'Entrez les accords séparés par des espaces (ex: I V VI IV)',
+            onTextChanged: (value) {
+              controller.text = value;
               // Update the chords without triggering rebuild
               final parsedChords = _parseChords(value);
               _sections[sectionIndex].measures[measureIndex].chords =
