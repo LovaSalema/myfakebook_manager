@@ -51,6 +51,13 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
           backgroundColor: isDark
               ? Color(AppColors.backgroundDark)
               : Color(AppColors.backgroundLight),
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
           title: Text(
             'Extraire les accords',
             style: TextStyle(
@@ -122,7 +129,7 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
     return Padding(
       padding: EdgeInsets.all(16.r),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
             'Sélectionner un fichier audio',
