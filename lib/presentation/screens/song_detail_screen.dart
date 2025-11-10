@@ -855,7 +855,7 @@ class _SongDetailScreenState extends State<SongDetailScreen> {
                     _MetadataItem(
                       icon: Icons.music_note,
                       label: 'Tonalité',
-                      value: 'Key of ${_song.key}',
+                      value: ' ${_song.key}',
                     ),
                     _MetadataItem(
                       icon: Icons.schedule,

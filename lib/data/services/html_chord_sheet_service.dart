@@ -267,7 +267,7 @@ class HtmlChordSheetService {
         <div class="header">
             <div class="header-left">
                 <h1>${song.title}</h1>
-                <div class="meta">key of ${song.key}</div>
+                <div class="meta">Tonalité: ${song.key}</div>
                 ${song.style != null ? '<div class="meta">${song.style}</div>' : ''}
                 ${song.structure?.description != null ? '<div class="meta">${song.structure!.description!}</div>' : ''}
             </div>

@@ -36,6 +36,11 @@ class _ChordInputWidgetState extends State<ChordInputWidget> {
         onMessageReceived: _onJavaScriptMessage,
       )
       ..loadHtmlString(_getHtmlContent());
+
+    // Set initial text after loading
+    _webViewController.runJavaScript(
+      "setTimeout(function() { setInitialText('${widget.initialText.replaceAll("'", "\\'")}'); }, 100);",
+    );
   }
 
   @override
@@ -647,6 +652,12 @@ gap: 4px
             display.textContent = '';
             sendToFlutter({ type: 'textChanged', text: currentText });
         });
+
+        // Fonction pour définir le texte initial
+        function setInitialText(text) {
+            currentText = text;
+            display.textContent = currentText;
+        }
 
         // Fonction pour recevoir des messages depuis Flutter (optionnel)
         window.addEventListener('message', function(event) {
