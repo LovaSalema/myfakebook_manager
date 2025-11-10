@@ -594,17 +594,43 @@ class _AddSongScreenState extends State<AddSongScreen> {
               const SizedBox(height: 8),
               Column(
                 children: [
-                  Slider(
-                    value: _tempoValue,
-                    min: 20,
-                    max: 300,
-                    divisions: 280,
-                    label: '${_tempoValue.toInt()} BPM',
-                    onChanged: (value) {
-                      setState(() {
-                        _tempoValue = value;
-                      });
-                    },
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.remove),
+                        onPressed: () {
+                          setState(() {
+                            if (_tempoValue > 20) {
+                              _tempoValue -= 1;
+                            }
+                          });
+                        },
+                      ),
+                      Expanded(
+                        child: Slider(
+                          value: _tempoValue,
+                          min: 20,
+                          max: 300,
+                          divisions: 280,
+                          label: '${_tempoValue.toInt()} BPM',
+                          onChanged: (value) {
+                            setState(() {
+                              _tempoValue = value;
+                            });
+                          },
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          setState(() {
+                            if (_tempoValue < 300) {
+                              _tempoValue += 1;
+                            }
+                          });
+                        },
+                      ),
+                    ],
                   ),
                   Text(
                     '${_tempoValue.toInt()} BPM',
