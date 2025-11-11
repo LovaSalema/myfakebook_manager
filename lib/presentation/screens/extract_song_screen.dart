@@ -48,8 +48,13 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
       _isExtracting = true;
     });
 
+    // Get the global provider instance
+    final songProvider = Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    );
+
     try {
-      final songProvider = ExtractionSongProvider();
       final service = ChordExtractionService();
 
       final audioFile = File(_selectedFilePath!);

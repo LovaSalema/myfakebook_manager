@@ -901,7 +901,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _showSongContextMenu(Song song) {
+  void _showSongContextMenu(Song song) async {
+    // Check if song is extracted
+    final regularSongProvider = Provider.of<SongProvider>(
+      context,
+      listen: false,
+    );
+    final regularSong = await regularSongProvider.getSongById(song.id!);
+    final isExtractedSong = regularSong == null;
+
     showModalBottomSheet(
       context: context,
       builder: (context) {
@@ -909,14 +917,17 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ListTile(
-                leading: const Icon(Icons.edit),
-                title: const Text('Éditer'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _editSong(song);
-                },
-              ),
+              // Only show edit option for regular songs
+              if (!isExtractedSong) ...[
+                ListTile(
+                  leading: const Icon(Icons.edit),
+                  title: const Text('Éditer'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    _editSong(song);
+                  },
+                ),
+              ],
               ListTile(
                 leading: const Icon(Icons.delete),
                 title: const Text('Supprimer'),
@@ -946,12 +957,24 @@ class _HomeScreenState extends State<HomeScreen> {
     ).push(MaterialPageRoute(builder: (context) => AddSongScreen(song: song)));
   }
 
-  void _deleteSong(Song song) {
+  void _deleteSong(Song song) async {
+    // Check if song is extracted
+    final regularSongProvider = Provider.of<SongProvider>(
+      context,
+      listen: false,
+    );
+    final regularSong = await regularSongProvider.getSongById(song.id!);
+    final isExtractedSong = regularSong == null;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Supprimer la chanson'),
+          title: Text(
+            isExtractedSong
+                ? 'Supprimer la chanson extraite'
+                : 'Supprimer la chanson',
+          ),
           content: Text(
             'Êtes-vous sûr de vouloir supprimer "${song.title}" par ${song.artist} ? Cette action est irréversible.',
           ),
@@ -964,11 +987,17 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 Navigator.of(context).pop();
                 try {
-                  final songProvider = Provider.of<SongProvider>(
-                    context,
-                    listen: false,
-                  );
-                  final success = await songProvider.deleteSong(song.id!);
+                  bool success;
+                  if (isExtractedSong) {
+                    final extractionSongProvider =
+                        Provider.of<ExtractionSongProvider>(
+                          context,
+                          listen: false,
+                        );
+                    success = await extractionSongProvider.deleteSong(song.id!);
+                  } else {
+                    success = await regularSongProvider.deleteSong(song.id!);
+                  }
 
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
