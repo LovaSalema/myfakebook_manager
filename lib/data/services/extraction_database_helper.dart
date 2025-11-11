@@ -9,50 +9,35 @@ import '../models/repertoire.dart';
 import '../models/repertoire_song.dart';
 import '../models/export_settings.dart';
 import '../../core/constants/app_constants.dart';
+import 'database_helper.dart';
 
 /// Custom database exception with clear error messages
-class DatabaseException implements Exception {
+class ExtractionDatabaseException implements Exception {
   final String message;
   final String operation;
   final dynamic error;
 
-  DatabaseException(this.message, {this.operation = '', this.error});
+  ExtractionDatabaseException(this.message, {this.operation = '', this.error});
 
   @override
   String toString() {
-    return 'DatabaseException: $message${operation.isNotEmpty ? ' (Operation: $operation)' : ''}${error != null ? ' - $error' : ''}';
+    return 'ExtractionDatabaseException: $message${operation.isNotEmpty ? ' (Operation: $operation)' : ''}${error != null ? ' - $error' : ''}';
   }
 }
 
-/// Abstract base class for database helpers
-abstract class BaseDatabaseHelper {
-  Future<Database> get database;
-  Future<int> insertSong(Song song);
-  Future<Song?> getSongById(int id);
-  Future<List<Song>> getAllSongs({String? orderBy, bool? favoritesOnly});
-  Future<int> updateSong(Song song);
-  Future<int> deleteSong(int id);
-  Future<List<Song>> searchSongs(String query);
-  Future<List<Song>> getSongsByKey(String key);
-  Future<List<Song>> getRecentSongs(int limit);
-  Future<int> toggleFavorite(int id);
-  Future<int> transposeSong(int songId, String newKey);
-  Future<void> close();
-  Future<void> deleteDatabase();
-}
-
-/// Professional DatabaseHelper singleton with repository pattern
-class DatabaseHelper implements BaseDatabaseHelper {
-  static final DatabaseHelper _instance = DatabaseHelper._internal();
+/// Professional ExtractionDatabaseHelper singleton for extracted songs
+class ExtractionDatabaseHelper implements BaseDatabaseHelper {
+  static final ExtractionDatabaseHelper _instance =
+      ExtractionDatabaseHelper._internal();
   static Database? _database;
 
   // Light memory cache
   Song? _lastAccessedSong;
   Repertoire? _lastAccessedRepertoire;
 
-  DatabaseHelper._internal();
+  ExtractionDatabaseHelper._internal();
 
-  factory DatabaseHelper() {
+  factory ExtractionDatabaseHelper() {
     return _instance;
   }
 
@@ -66,7 +51,7 @@ class DatabaseHelper implements BaseDatabaseHelper {
   /// Initialize database with migration support
   Future<Database> _initDatabase() async {
     try {
-      final path = join(await getDatabasesPath(), AppConstants.databaseName);
+      final path = join(await getDatabasesPath(), 'myfakebook_extractions.db');
       return await openDatabase(
         path,
         version: AppConstants.databaseVersion,
@@ -74,7 +59,10 @@ class DatabaseHelper implements BaseDatabaseHelper {
         onUpgrade: _migrateDatabase,
       );
     } catch (e) {
-      throw DatabaseException('Failed to initialize database', error: e);
+      throw ExtractionDatabaseException(
+        'Failed to initialize extraction database',
+        error: e,
+      );
     }
   }
 
@@ -173,31 +161,41 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       // Create indexes for better performance
       await _createIndexes(db);
-
-      // Seed database with example data
-      await _seedDatabase(db);
     } catch (e) {
-      throw DatabaseException('Failed to create database tables', error: e);
+      throw ExtractionDatabaseException(
+        'Failed to create extraction database tables',
+        error: e,
+      );
     }
   }
 
   /// Create database indexes
   Future<void> _createIndexes(Database db) async {
-    await db.execute('CREATE INDEX idx_songs_title ON songs(title)');
-    await db.execute('CREATE INDEX idx_songs_artist ON songs(artist)');
-    await db.execute('CREATE INDEX idx_songs_key ON songs(key)');
-    await db.execute('CREATE INDEX idx_songs_favorite ON songs(is_favorite)');
-    await db.execute('CREATE INDEX idx_songs_created ON songs(created_at)');
-    await db.execute('CREATE INDEX idx_repertoires_name ON repertoires(name)');
+    await db.execute('CREATE INDEX idx_extraction_songs_title ON songs(title)');
     await db.execute(
-      'CREATE INDEX idx_repertoires_event ON repertoires(event_date)',
+      'CREATE INDEX idx_extraction_songs_artist ON songs(artist)',
     );
-    await db.execute('CREATE INDEX idx_sections_song ON sections(song_id)');
+    await db.execute('CREATE INDEX idx_extraction_songs_key ON songs(key)');
     await db.execute(
-      'CREATE INDEX idx_measures_section ON measures(section_id)',
+      'CREATE INDEX idx_extraction_songs_favorite ON songs(is_favorite)',
     );
     await db.execute(
-      'CREATE INDEX idx_repertoire_songs_order ON repertoire_songs(order_index)',
+      'CREATE INDEX idx_extraction_songs_created ON songs(created_at)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_extraction_repertoires_name ON repertoires(name)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_extraction_repertoires_event ON repertoires(event_date)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_extraction_sections_song ON sections(song_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_extraction_measures_section ON measures(section_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_extraction_repertoire_songs_order ON repertoire_songs(order_index)',
     );
   }
 
@@ -217,7 +215,10 @@ class DatabaseHelper implements BaseDatabaseHelper {
         }
       }
     } catch (e) {
-      throw DatabaseException('Database migration failed', error: e);
+      throw ExtractionDatabaseException(
+        'Extraction database migration failed',
+        error: e,
+      );
     }
   }
 
@@ -259,8 +260,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
         return songId;
       });
     } catch (e) {
-      throw DatabaseException(
-        'Failed to insert song',
+      throw ExtractionDatabaseException(
+        'Failed to insert song in extraction database',
         operation: 'insertSong',
         error: e,
       );
@@ -307,8 +308,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
       _lastAccessedSong = completeSong;
       return completeSong;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to get song by ID',
+      throw ExtractionDatabaseException(
+        'Failed to get song by ID from extraction database',
         operation: 'getSongById',
         error: e,
       );
@@ -366,8 +367,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       return songs;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to get all songs',
+      throw ExtractionDatabaseException(
+        'Failed to get all songs from extraction database',
         operation: 'getAllSongs',
         error: e,
       );
@@ -424,8 +425,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
         return result;
       });
     } catch (e) {
-      throw DatabaseException(
-        'Failed to update song',
+      throw ExtractionDatabaseException(
+        'Failed to update song in extraction database',
         operation: 'updateSong',
         error: e,
       );
@@ -441,8 +442,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
       _lastAccessedSong = null;
       return result;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to delete song',
+      throw ExtractionDatabaseException(
+        'Failed to delete song from extraction database',
         operation: 'deleteSong',
         error: e,
       );
@@ -491,8 +492,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       return songs;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to search songs',
+      throw ExtractionDatabaseException(
+        'Failed to search songs in extraction database',
         operation: 'searchSongs',
         error: e,
       );
@@ -541,8 +542,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       return songs;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to get songs by key',
+      throw ExtractionDatabaseException(
+        'Failed to get songs by key from extraction database',
         operation: 'getSongsByKey',
         error: e,
       );
@@ -590,8 +591,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       return songs;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to get recent songs',
+      throw ExtractionDatabaseException(
+        'Failed to get recent songs from extraction database',
         operation: 'getRecentSongs',
         error: e,
       );
@@ -611,7 +612,10 @@ class DatabaseHelper implements BaseDatabaseHelper {
         whereArgs: [id],
       );
 
-      if (current.isEmpty) throw DatabaseException('Song not found');
+      if (current.isEmpty)
+        throw ExtractionDatabaseException(
+          'Song not found in extraction database',
+        );
 
       final newStatus = current.first['is_favorite'] == 1 ? 0 : 1;
 
@@ -625,8 +629,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
         whereArgs: [id],
       );
     } catch (e) {
-      throw DatabaseException(
-        'Failed to toggle favorite',
+      throw ExtractionDatabaseException(
+        'Failed to toggle favorite in extraction database',
         operation: 'toggleFavorite',
         error: e,
       );
@@ -645,291 +649,9 @@ class DatabaseHelper implements BaseDatabaseHelper {
         whereArgs: [songId],
       );
     } catch (e) {
-      throw DatabaseException(
-        'Failed to transpose song',
+      throw ExtractionDatabaseException(
+        'Failed to transpose song in extraction database',
         operation: 'transposeSong',
-        error: e,
-      );
-    }
-  }
-
-  // ===========================================================================
-  // REPERTOIRE REPOSITORY
-  // ===========================================================================
-
-  /// Insert repertoire
-  Future<int> insertRepertoire(Repertoire repertoire) async {
-    final db = await database;
-
-    try {
-      final id = await db.insert('repertoires', repertoire.toMap());
-      _lastAccessedRepertoire = repertoire.copyWith(id: id);
-      return id;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to insert repertoire',
-        operation: 'insertRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Get repertoire by ID with ordered songs
-  Future<Repertoire?> getRepertoireById(int id) async {
-    if (_lastAccessedRepertoire?.id == id) return _lastAccessedRepertoire;
-
-    final db = await database;
-
-    try {
-      final maps = await db.query(
-        'repertoires',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-      if (maps.isEmpty) return null;
-
-      final repertoire = Repertoire.fromMap(maps.first);
-      _lastAccessedRepertoire = repertoire;
-      return repertoire;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to get repertoire by ID',
-        operation: 'getRepertoireById',
-        error: e,
-      );
-    }
-  }
-
-  /// Get all repertoires with optional ordering
-  Future<List<Repertoire>> getAllRepertoires({String? orderBy}) async {
-    final db = await database;
-
-    try {
-      final orderByClause = _getOrderByClause(orderBy, 'repertoires');
-      final maps = await db.query('repertoires', orderBy: orderByClause);
-      return maps.map((map) => Repertoire.fromMap(map)).toList();
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to get all repertoires',
-        operation: 'getAllRepertoires',
-        error: e,
-      );
-    }
-  }
-
-  /// Update repertoire
-  Future<int> updateRepertoire(Repertoire repertoire) async {
-    final db = await database;
-
-    try {
-      final result = await db.update(
-        'repertoires',
-        repertoire.toMap(),
-        where: 'id = ?',
-        whereArgs: [repertoire.id],
-      );
-
-      _lastAccessedRepertoire = null;
-      return result;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to update repertoire',
-        operation: 'updateRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Delete repertoire with cascade deletion
-  Future<int> deleteRepertoire(int id) async {
-    final db = await database;
-
-    try {
-      final result = await db.delete(
-        'repertoires',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
-      _lastAccessedRepertoire = null;
-      return result;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to delete repertoire',
-        operation: 'deleteRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Add multiple songs to repertoire
-  Future<void> addSongsToRepertoire(int repertoireId, List<int> songIds) async {
-    final db = await database;
-
-    try {
-      await db.transaction((txn) async {
-        // Get current max order index
-        final currentMax = await txn.rawQuery(
-          'SELECT MAX(order_index) as max_order FROM repertoire_songs WHERE repertoire_id = ?',
-          [repertoireId],
-        );
-
-        // Handle case when no songs exist in repertoire (max_order will be null)
-        final maxOrder = currentMax.first['max_order'];
-        int nextOrder = (maxOrder != null ? maxOrder as int : -1) + 1;
-
-        // Insert each song
-        for (int i = 0; i < songIds.length; i++) {
-          final repertoireSong = RepertoireSong.create(
-            repertoireId: repertoireId,
-            songId: songIds[i],
-            orderIndex: nextOrder + i,
-          );
-          await txn.insert('repertoire_songs', repertoireSong.toMap());
-        }
-      });
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to add songs to repertoire',
-        operation: 'addSongsToRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Remove song from repertoire
-  Future<int> removeSongFromRepertoire(int repertoireId, int songId) async {
-    final db = await database;
-
-    try {
-      return await db.delete(
-        'repertoire_songs',
-        where: 'repertoire_id = ? AND song_id = ?',
-        whereArgs: [repertoireId, songId],
-      );
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to remove song from repertoire',
-        operation: 'removeSongFromRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Reorder songs in repertoire
-  Future<void> reorderSongsInRepertoire(
-    int repertoireId,
-    List<int> orderedSongIds,
-  ) async {
-    final db = await database;
-
-    try {
-      await db.transaction((txn) async {
-        // Delete all current songs
-        await txn.delete(
-          'repertoire_songs',
-          where: 'repertoire_id = ?',
-          whereArgs: [repertoireId],
-        );
-
-        // Insert in new order
-        for (int i = 0; i < orderedSongIds.length; i++) {
-          final repertoireSong = RepertoireSong.create(
-            repertoireId: repertoireId,
-            songId: orderedSongIds[i],
-            orderIndex: i,
-          );
-          await txn.insert('repertoire_songs', repertoireSong.toMap());
-        }
-      });
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to reorder songs in repertoire',
-        operation: 'reorderSongsInRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Get songs in repertoire with ordering
-  Future<List<Song>> getSongsInRepertoire(
-    int repertoireId, {
-    String? orderBy,
-  }) async {
-    final db = await database;
-
-    try {
-      final orderByClause = orderBy == 'title'
-          ? 's.title ASC'
-          : 'rs.order_index ASC';
-
-      final maps = await db.rawQuery(
-        '''
-        SELECT s.* FROM songs s
-        INNER JOIN repertoire_songs rs ON s.id = rs.song_id
-        WHERE rs.repertoire_id = ?
-        ORDER BY $orderByClause
-      ''',
-        [repertoireId],
-      );
-
-      // Load complete song data with sections and measures
-      final songs = <Song>[];
-      for (final map in maps) {
-        final song = Song.fromMap(map);
-        final songId = song.id!;
-
-        // Load structure
-        final structureMaps = await db.query(
-          'structures',
-          where: 'song_id = ?',
-          whereArgs: [songId],
-        );
-        Structure? structure;
-        if (structureMaps.isNotEmpty) {
-          structure = Structure.fromMap(structureMaps.first);
-        }
-
-        // Load sections with measures
-        final sections = await _getSectionsForSong(songId);
-
-        // Create complete song
-        final completeSong = song.copyWith(
-          structure: structure,
-          sections: sections,
-        );
-        songs.add(completeSong);
-      }
-
-      return songs;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to get songs in repertoire',
-        operation: 'getSongsInRepertoire',
-        error: e,
-      );
-    }
-  }
-
-  /// Get repertoires containing a specific song
-  Future<List<Repertoire>> getRepertoiresBySongId(int songId) async {
-    final db = await database;
-
-    try {
-      final maps = await db.rawQuery(
-        '''
-        SELECT r.* FROM repertoires r
-        INNER JOIN repertoire_songs rs ON r.id = rs.repertoire_id
-        WHERE rs.song_id = ?
-        ORDER BY r.name ASC
-      ''',
-        [songId],
-      );
-
-      return maps.map((map) => Repertoire.fromMap(map)).toList();
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to get repertoires by song ID',
-        operation: 'getRepertoiresBySongId',
         error: e,
       );
     }
@@ -986,8 +708,8 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
       return sections;
     } catch (e) {
-      throw DatabaseException(
-        'Failed to get sections for song',
+      throw ExtractionDatabaseException(
+        'Failed to get sections for song from extraction database',
         operation: '_getSectionsForSong',
         error: e,
       );
@@ -1019,171 +741,6 @@ class DatabaseHelper implements BaseDatabaseHelper {
     }
   }
 
-  /// Seed database with example data
-  Future<void> _seedDatabase(Database db) async {
-    try {
-      // Example song 1: Autumn Leaves
-      final autumnLeaves = Song.create(
-        title: 'Autumn Leaves',
-        artist: 'Joseph Kosma',
-        key: 'Cm',
-        timeSignature: '4/4',
-        tempo: 120,
-        style: 'Jazz Standard',
-      );
-
-      final songId1 = await db.insert('songs', autumnLeaves.toMap());
-
-      // Add structure
-      await db.insert(
-        'structures',
-        Structure.create(
-          songId: songId1,
-          pattern: 'AABA',
-          description: 'Classic AABA form',
-        ).toMap(),
-      );
-
-      // Add sections and measures
-      final sections1 = [
-        Section.create(
-          songId: songId1,
-          sectionType: 'VERSE',
-          sectionLabel: 'A',
-          sectionOrder: 0,
-          measureCount: 8,
-        ),
-        Section.create(
-          songId: songId1,
-          sectionType: 'VERSE',
-          sectionLabel: 'A',
-          sectionOrder: 1,
-          measureCount: 8,
-        ),
-        Section.create(
-          songId: songId1,
-          sectionType: 'BRIDGE',
-          sectionLabel: 'B',
-          sectionOrder: 2,
-          measureCount: 8,
-        ),
-        Section.create(
-          songId: songId1,
-          sectionType: 'VERSE',
-          sectionLabel: 'A',
-          sectionOrder: 3,
-          measureCount: 8,
-        ),
-      ];
-
-      for (final section in sections1) {
-        final sectionId = await db.insert('sections', section.toMap());
-
-        // Add example measures with chords
-        for (int i = 0; i < section.measures.length; i++) {
-          final measure = section.measures[i];
-          final measureMap = measure.copyWith(sectionId: sectionId).toMap();
-          measureMap['chords_json'] = jsonEncode([
-            'Cm7',
-            'F7',
-            'BbMaj7',
-            'EbMaj7',
-          ]);
-          await db.insert('measures', measureMap);
-        }
-      }
-
-      // Example song 2: Blue Bossa
-      final blueBossa = Song.create(
-        title: 'Blue Bossa',
-        artist: 'Kenny Dorham',
-        key: 'Cm',
-        timeSignature: '4/4',
-        tempo: 132,
-        style: 'Bossa Nova',
-      );
-
-      final songId2 = await db.insert('songs', blueBossa.toMap());
-
-      // Add structure
-      await db.insert(
-        'structures',
-        Structure.create(
-          songId: songId2,
-          pattern: 'AB',
-          description: 'Simple AB form',
-        ).toMap(),
-      );
-
-      // Add sections
-      final sections2 = [
-        Section.create(
-          songId: songId2,
-          sectionType: 'VERSE',
-          sectionLabel: 'A',
-          sectionOrder: 0,
-          measureCount: 8,
-        ),
-        Section.create(
-          songId: songId2,
-          sectionType: 'BRIDGE',
-          sectionLabel: 'B',
-          sectionOrder: 1,
-          measureCount: 8,
-        ),
-      ];
-
-      for (final section in sections2) {
-        final sectionId = await db.insert('sections', section.toMap());
-
-        for (int i = 0; i < section.measures.length; i++) {
-          final measure = section.measures[i];
-          final measureMap = measure.copyWith(sectionId: sectionId).toMap();
-          measureMap['chords_json'] = jsonEncode(['Cm7', 'Fm7', 'Dm7b5', 'G7']);
-          await db.insert('measures', measureMap);
-        }
-      }
-
-      // Example repertoire
-      final jazzStandards = Repertoire.create(
-        name: 'Jazz Standards',
-        description: 'Essential jazz repertoire for gigs',
-        eventDate: DateTime.now().add(Duration(days: 30)),
-        coverColor: '#3B82F6',
-        icon: 'music_note',
-      );
-
-      final repertoireId = await db.insert(
-        'repertoires',
-        jazzStandards.toMap(),
-      );
-
-      // Add songs to repertoire
-      await db.insert(
-        'repertoire_songs',
-        RepertoireSong.create(
-          repertoireId: repertoireId,
-          songId: songId1,
-          orderIndex: 0,
-          notes: 'Great for opening sets',
-        ).toMap(),
-      );
-
-      await db.insert(
-        'repertoire_songs',
-        RepertoireSong.create(
-          repertoireId: repertoireId,
-          songId: songId2,
-          orderIndex: 1,
-          notes: 'Perfect bossa nova groove',
-        ).toMap(),
-      );
-    } catch (e) {
-      // Log seed error but don't fail initialization
-      print('Database seeding failed: $e');
-    }
-  }
-
   // ===========================================================================
   // DATABASE MAINTENANCE
   // ===========================================================================
@@ -1199,99 +756,10 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
   /// Delete database (for testing/reset)
   Future<void> deleteDatabase() async {
-    final path = join(await getDatabasesPath(), AppConstants.databaseName);
+    final path = join(await getDatabasesPath(), 'myfakebook_extractions.db');
     await databaseFactory.deleteDatabase(path);
     _database = null;
     _lastAccessedSong = null;
     _lastAccessedRepertoire = null;
-  }
-
-  /// Export database as backup
-  Future<Map<String, dynamic>> exportDatabase() async {
-    final db = await database;
-
-    try {
-      final songs = await getAllSongs();
-      final repertoires = await getAllRepertoires();
-      final repertoireSongs = <RepertoireSong>[];
-
-      // Get all repertoire songs
-      for (final repertoire in repertoires) {
-        final songsInRepertoire = await getSongsInRepertoire(repertoire.id!);
-        for (final song in songsInRepertoire) {
-          final rsMaps = await db.query(
-            'repertoire_songs',
-            where: 'repertoire_id = ? AND song_id = ?',
-            whereArgs: [repertoire.id, song.id],
-          );
-          if (rsMaps.isNotEmpty) {
-            repertoireSongs.add(RepertoireSong.fromMap(rsMaps.first));
-          }
-        }
-      }
-
-      return {
-        'songs': songs.map((song) => song.toMap()).toList(),
-        'repertoires': repertoires
-            .map((repertoire) => repertoire.toMap())
-            .toList(),
-        'repertoireSongs': repertoireSongs.map((rs) => rs.toMap()).toList(),
-        'exportedAt': DateTime.now().millisecondsSinceEpoch,
-        'version': AppConstants.databaseVersion,
-      };
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to export database',
-        operation: 'exportDatabase',
-        error: e,
-      );
-    }
-  }
-
-  /// Import database from backup
-  Future<void> importDatabase(Map<String, dynamic> backup) async {
-    final db = await database;
-
-    try {
-      await db.transaction((txn) async {
-        // Clear existing data
-        await txn.delete('songs');
-        await txn.delete('repertoires');
-        await txn.delete('repertoire_songs');
-        await txn.delete('structures');
-        await txn.delete('sections');
-        await txn.delete('measures');
-
-        // Import songs
-        final songs = (backup['songs'] as List).cast<Map<String, dynamic>>();
-        for (final songData in songs) {
-          await txn.insert('songs', songData);
-        }
-
-        // Import repertoires
-        final repertoires = (backup['repertoires'] as List)
-            .cast<Map<String, dynamic>>();
-        for (final repertoireData in repertoires) {
-          await txn.insert('repertoires', repertoireData);
-        }
-
-        // Import repertoire songs
-        final repertoireSongs = (backup['repertoireSongs'] as List)
-            .cast<Map<String, dynamic>>();
-        for (final rsData in repertoireSongs) {
-          await txn.insert('repertoire_songs', rsData);
-        }
-      });
-
-      // Clear cache
-      _lastAccessedSong = null;
-      _lastAccessedRepertoire = null;
-    } catch (e) {
-      throw DatabaseException(
-        'Failed to import database',
-        operation: 'importDatabase',
-        error: e,
-      );
-    }
   }
 }

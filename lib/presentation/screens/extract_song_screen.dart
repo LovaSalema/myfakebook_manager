@@ -7,6 +7,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/theme_provider.dart';
 import '../providers/song_provider.dart';
+import '../providers/extraction_song_provider.dart';
 import '../../data/services/chord_extraction_service.dart';
 
 class ExtractSongScreen extends StatefulWidget {
@@ -48,7 +49,7 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
     });
 
     try {
-      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      final songProvider = ExtractionSongProvider();
       final service = ChordExtractionService();
 
       final audioFile = File(_selectedFilePath!);

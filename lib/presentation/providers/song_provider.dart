@@ -7,7 +7,11 @@ import '../../core/utils/validators.dart';
 
 /// Modern SongProvider with advanced state management features
 class SongProvider with ChangeNotifier {
-  final DatabaseHelper _databaseHelper = DatabaseHelper();
+  final BaseDatabaseHelper _databaseHelper;
+
+  // Constructor with optional database helper (defaults to main database)
+  SongProvider([BaseDatabaseHelper? databaseHelper])
+    : _databaseHelper = databaseHelper ?? DatabaseHelper();
 
   // Core state
   List<Song> _songs = [];
@@ -54,8 +58,7 @@ class SongProvider with ChangeNotifier {
     _clearError();
 
     // Validate song
-    final errors = song.validate();
-    if (errors) {
+    if (!song.validate()) {
       print('Song validation failed in provider');
       _setError('Invalid song data');
       return false;
@@ -97,8 +100,7 @@ class SongProvider with ChangeNotifier {
     _clearError();
 
     // Validate song
-    final errors = song.validate();
-    if (errors) {
+    if (!song.validate()) {
       _setError('Invalid song data');
       return false;
     }

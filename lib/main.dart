@@ -15,6 +15,7 @@ import 'data/services/database_helper.dart';
 // Presentation imports
 import 'presentation/screens/home_screen.dart';
 import 'presentation/providers/song_provider.dart';
+import 'presentation/providers/extraction_song_provider.dart';
 import 'presentation/providers/repertoire_provider.dart';
 import 'presentation/providers/export_provider.dart';
 import 'presentation/providers/theme_provider.dart';
@@ -32,6 +33,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SongProvider()),
+        ChangeNotifierProvider(create: (_) => ExtractionSongProvider()),
         ChangeNotifierProvider(create: (_) => RepertoireProvider()),
         ChangeNotifierProvider(create: (_) => ExportProvider()),
       ],
