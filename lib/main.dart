@@ -91,6 +91,10 @@ class _SplashScreenState extends State<SplashScreen> {
 
     // Load initial data
     final songProvider = Provider.of<SongProvider>(context, listen: false);
+    final extractionSongProvider = Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    );
     final repertoireProvider = Provider.of<RepertoireProvider>(
       context,
       listen: false,
@@ -98,6 +102,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
     try {
       await songProvider.loadSongs();
+      await extractionSongProvider.loadSongs();
       await repertoireProvider.loadRepertoires();
     } catch (e) {
       print('Error loading initial data: $e');

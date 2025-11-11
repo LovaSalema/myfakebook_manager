@@ -7,6 +7,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/song_provider.dart';
+import '../providers/extraction_song_provider.dart';
 import '../providers/repertoire_provider.dart';
 import '../providers/theme_provider.dart';
 import '../../data/models/song.dart';
@@ -14,6 +15,7 @@ import '../../data/models/repertoire.dart';
 import '../../data/services/test_data_service.dart';
 import '../../data/services/database_helper.dart';
 import 'song_detail_screen.dart';
+import 'extracted_song_detail_screen.dart';
 import 'add_song_screen.dart';
 import 'add_repertoire_screen.dart';
 import 'repertoire_detail_screen.dart';
@@ -87,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _loadInitialData() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<SongProvider>(context, listen: false).loadSongs();
+      Provider.of<ExtractionSongProvider>(context, listen: false).loadSongs();
       Provider.of<RepertoireProvider>(context, listen: false).loadRepertoires();
     });
   }
@@ -96,25 +99,29 @@ class _HomeScreenState extends State<HomeScreen> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
 
-    return Scaffold(
-      backgroundColor: isDark
-          ? Color(AppColors.backgroundDark)
-          : Color(AppColors.backgroundLight),
-      appBar: _buildAppBar(context, isDark),
-      body: RefreshIndicator(
-        onRefresh: _refreshData,
-        child: CustomScrollView(
-          controller: _scrollController,
-          slivers: [
-            // Statistics Section
-            _buildStatsSection(),
+    return Consumer2<SongProvider, ExtractionSongProvider>(
+      builder: (context, songProvider, extractionSongProvider, child) {
+        return Scaffold(
+          backgroundColor: isDark
+              ? Color(AppColors.backgroundDark)
+              : Color(AppColors.backgroundLight),
+          appBar: _buildAppBar(context, isDark),
+          body: RefreshIndicator(
+            onRefresh: _refreshData,
+            child: CustomScrollView(
+              controller: _scrollController,
+              slivers: [
+                // Statistics Section
+                _buildStatsSection(),
 
-            // Content based on selected view
-            _buildContentView(),
-          ],
-        ),
-      ),
-      floatingActionButton: _showFab ? _buildFloatingActionButton() : null,
+                // Content based on selected view
+                _buildContentView(),
+              ],
+            ),
+          ),
+          floatingActionButton: _showFab ? _buildFloatingActionButton() : null,
+        );
+      },
     );
   }
 
@@ -241,41 +248,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Build statistics section
   Widget _buildStatsSection() {
-    return SliverToBoxAdapter(
-      child: Consumer2<SongProvider, RepertoireProvider>(
-        builder: (context, songProvider, repertoireProvider, child) {
-          return FutureBuilder<Map<String, int>>(
-            future: songProvider.getStats(),
-            builder: (context, snapshot) {
-              final stats =
-                  snapshot.data ?? {'songCount': 0, 'favoriteCount': 0};
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    final extractionSongProvider = Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    );
+    final repertoireProvider = Provider.of<RepertoireProvider>(
+      context,
+      listen: false,
+    );
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
-                child: Row(
-                  children: [
-                    _StatCard(
-                      title: 'Chansons',
-                      value: stats['songCount']?.toString() ?? '0',
-                      icon: Icons.music_note,
-                      color: Color(AppColors.primary),
-                      onTap: _showSongsView,
-                      isActive: _currentView == 0,
-                    ),
-                    SizedBox(width: 12.w),
-                    _StatCard(
-                      title: 'Répertoires',
-                      value: repertoireProvider.repertoireCount.toString(),
-                      icon: Icons.library_music,
-                      color: Colors.blue,
-                      onTap: _showRepertoiresView,
-                      isActive: _currentView == 1,
-                    ),
-                  ],
+    return SliverToBoxAdapter(
+      child: FutureBuilder<Map<String, int>>(
+        future: _getCombinedStats(songProvider, extractionSongProvider),
+        builder: (context, snapshot) {
+          final stats = snapshot.data ?? {'songCount': 0, 'favoriteCount': 0};
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 8.h),
+            child: Row(
+              children: [
+                _StatCard(
+                  title: 'Chansons',
+                  value: stats['songCount']?.toString() ?? '0',
+                  icon: Icons.music_note,
+                  color: Color(AppColors.primary),
+                  onTap: _showSongsView,
+                  isActive: _currentView == 0,
                 ),
-              ).animate().slideY(begin: 0.1, end: 0, duration: 400.ms);
-            },
-          );
+                SizedBox(width: 12.w),
+                _StatCard(
+                  title: 'Répertoires',
+                  value: repertoireProvider.repertoireCount.toString(),
+                  icon: Icons.library_music,
+                  color: Colors.blue,
+                  onTap: _showRepertoiresView,
+                  isActive: _currentView == 1,
+                ),
+              ],
+            ),
+          ).animate().slideY(begin: 0.1, end: 0, duration: 400.ms);
         },
       ),
     );
@@ -292,29 +304,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Build songs tab content
   Widget _buildSongsTab() {
-    return Consumer<SongProvider>(
-      builder: (context, songProvider, child) {
-        final filteredSongs = _getFilteredSongs(songProvider.songs);
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    final extractionSongProvider = Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    );
+    final combinedSongs = [
+      ...songProvider.songs,
+      ...extractionSongProvider.songs,
+    ];
+    final filteredSongs = _getFilteredSongs(combinedSongs);
 
-        if (songProvider.isLoading) {
-          return _buildLoadingState();
-        }
+    if (songProvider.isLoading || extractionSongProvider.isLoading) {
+      return _buildLoadingState();
+    }
 
-        if (filteredSongs.isEmpty && !songProvider.isLoading) {
-          return _buildEmptyState();
-        }
+    if (filteredSongs.isEmpty &&
+        !songProvider.isLoading &&
+        !extractionSongProvider.isLoading) {
+      return _buildEmptyState();
+    }
 
-        return SliverList(
-          delegate: SliverChildBuilderDelegate((context, index) {
-            final song = filteredSongs[index];
-            return _SongCard(
-              song: song,
-              onTap: () => _navigateToSongDetail(song),
-              onLongPress: () => _showSongContextMenu(song),
-            ).animate().fadeIn(delay: (100 * index).ms);
-          }, childCount: filteredSongs.length),
-        );
-      },
+    return SliverList(
+      delegate: SliverChildBuilderDelegate((context, index) {
+        final song = filteredSongs[index];
+        return _SongCard(
+          song: song,
+          onTap: () => _navigateToSongDetail(song),
+          onLongPress: () => _showSongContextMenu(song),
+        ).animate().fadeIn(delay: (100 * index).ms);
+      }, childCount: filteredSongs.length),
     );
   }
 
@@ -540,56 +559,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Build empty state
   Widget _buildEmptyState() {
-    return Consumer<SongProvider>(
-      builder: (context, songProvider, child) {
-        if (songProvider.songs.isNotEmpty || songProvider.isLoading) {
-          return const SliverToBoxAdapter(child: SizedBox.shrink());
-        }
+    final songProvider = Provider.of<SongProvider>(context, listen: false);
+    final extractionSongProvider = Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    );
 
-        return SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: EdgeInsets.all(32.r),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.music_note_outlined,
-                  size: 80.sp,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withOpacity(0.3),
-                ),
-                SizedBox(height: 24.h),
-                Text(
-                  'Aucune chanson',
-                  style: AppTextStyles.headlineSmall.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'Créez votre première grille d\'accords',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withOpacity(0.5),
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(height: 24.h),
-                // FilledButton(
-                //   onPressed: _createNewSong,
-                //   child: const Text('Commencer'),
-                // ),
-              ],
+    if ((songProvider.songs.isNotEmpty ||
+            extractionSongProvider.songs.isNotEmpty) ||
+        songProvider.isLoading ||
+        extractionSongProvider.isLoading) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Padding(
+        padding: EdgeInsets.all(32.r),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.music_note_outlined,
+              size: 80.sp,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
             ),
-          ),
-        );
-      },
+            SizedBox(height: 24.h),
+            Text(
+              'Aucune chanson',
+              style: AppTextStyles.headlineSmall.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Créez votre première grille d\'accords',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 24.h),
+            // FilledButton(
+            //   onPressed: _createNewSong,
+            //   child: const Text('Commencer'),
+            // ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -728,10 +746,30 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshData() async {
     await Provider.of<SongProvider>(context, listen: false).loadSongs();
+    await Provider.of<ExtractionSongProvider>(
+      context,
+      listen: false,
+    ).loadSongs();
     await Provider.of<RepertoireProvider>(
       context,
       listen: false,
     ).loadRepertoires();
+  }
+
+  Future<Map<String, int>> _getCombinedStats(
+    SongProvider songProvider,
+    ExtractionSongProvider extractionSongProvider,
+  ) async {
+    final regularStats = await songProvider.getStats();
+    final extractedStats = await extractionSongProvider.getStats();
+
+    return {
+      'songCount':
+          (regularStats['songCount'] ?? 0) + (extractedStats['songCount'] ?? 0),
+      'favoriteCount':
+          (regularStats['favoriteCount'] ?? 0) +
+          (extractedStats['favoriteCount'] ?? 0),
+    };
   }
 
   void _onSearchChanged(String query) {
@@ -807,12 +845,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Recharger les données dans les providers
       final songProvider = Provider.of<SongProvider>(context, listen: false);
+      final extractionSongProvider = Provider.of<ExtractionSongProvider>(
+        context,
+        listen: false,
+      );
       final repertoireProvider = Provider.of<RepertoireProvider>(
         context,
         listen: false,
       );
 
       await songProvider.loadSongs();
+      await extractionSongProvider.loadSongs();
       await repertoireProvider.loadRepertoires();
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -831,13 +874,30 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _navigateToSongDetail(Song song) {
+  void _navigateToSongDetail(Song song) async {
     if (song.id != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => SongDetailScreen(songId: song.id!),
-        ),
+      // Check if song exists in regular provider first
+      final regularSongProvider = Provider.of<SongProvider>(
+        context,
+        listen: false,
       );
+      final regularSong = await regularSongProvider.getSongById(song.id!);
+
+      if (regularSong != null) {
+        // Song is from regular provider
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => SongDetailScreen(songId: song.id!),
+          ),
+        );
+      } else {
+        // Song is from extracted provider
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ExtractedSongDetailScreen(songId: song.id!),
+          ),
+        );
+      }
     }
   }
 
