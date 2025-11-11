@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
@@ -5,6 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../core/theme/app_colors.dart';
 import '../providers/theme_provider.dart';
+import '../providers/song_provider.dart';
+import '../../data/services/chord_extraction_service.dart';
 
 class ExtractSongScreen extends StatefulWidget {
   const ExtractSongScreen({super.key});
@@ -16,6 +19,7 @@ class ExtractSongScreen extends StatefulWidget {
 class _ExtractSongScreenState extends State<ExtractSongScreen> {
   final TextEditingController _urlController = TextEditingController();
   String? _selectedFilePath;
+  bool _isExtracting = false;
 
   @override
   void dispose() {
@@ -33,6 +37,106 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
       setState(() {
         _selectedFilePath = result.files.single.path;
       });
+    }
+  }
+
+  Future<void> _extractChordsFromFile() async {
+    if (_selectedFilePath == null) return;
+
+    setState(() {
+      _isExtracting = true;
+    });
+
+    try {
+      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      final service = ChordExtractionService();
+
+      final audioFile = File(_selectedFilePath!);
+
+      // Show progress for API calls
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Extraction des accords en cours... Cela peut prendre jusqu\'à 1 minute',
+            ),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+
+      final apiData = await service.extractChordsAndBeats(audioFile);
+
+      final fileName = _selectedFilePath!.split('/').last;
+      final song = service.createSongFromApiData(apiData, fileName);
+
+      // Debug: print song details
+      print(
+        'Song created: title=${song.title}, artist=${song.artist}, key=${song.key}, timeSig=${song.timeSignature}, tempo=${song.tempo}',
+      );
+      print('Sections count: ${song.sections.length}');
+      for (var section in song.sections) {
+        print(
+          'Section: type=${section.sectionType}, label=${section.sectionLabel}, measures=${section.measures.length}',
+        );
+        for (var measure in section.measures) {
+          print(
+            'Measure: order=${measure.measureOrder}, chords=${measure.chords}',
+          );
+        }
+      }
+
+      // Validate song before saving
+      print('Validating song...');
+      if (!song.validate()) {
+        print('Song validation failed');
+        // Check sections
+        for (var section in song.sections) {
+          print('Section validation: ${section.validate()}');
+          if (!section.validate()) {
+            print('Section failed: measures=${section.measures.length}');
+            for (var measure in section.measures) {
+              print(
+                'Measure validation: ${measure.validate()}, chords=${measure.chords}',
+              );
+            }
+          }
+        }
+        throw Exception('Données de chanson invalides');
+      }
+      print('Song validation passed');
+
+      final success = await songProvider.addSong(song);
+
+      if (success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Chanson extraite avec succès depuis fichier audio',
+              ),
+            ),
+          );
+          Navigator.of(context).pop();
+        }
+      } else {
+        throw Exception('Échec de l\'enregistrement de la chanson');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'extraction: $e'),
+            duration: Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExtracting = false;
+        });
+      }
     }
   }
 
@@ -175,20 +279,16 @@ class _ExtractSongScreenState extends State<ExtractSongScreen> {
           Align(
             alignment: Alignment.center,
             child: ElevatedButton(
-              onPressed: _selectedFilePath != null
-                  ? () {
-                      // TODO: Implement audio file extraction logic
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Chanson extraite avec succès depuis fichier audio',
-                          ),
-                        ),
-                      );
-                      Navigator.of(context).pop();
-                    }
+              onPressed: (_selectedFilePath != null && !_isExtracting)
+                  ? _extractChordsFromFile
                   : null,
-              child: const Text('Extraire les accords'),
+              child: _isExtracting
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Extraire les accords'),
             ),
           ),
         ],

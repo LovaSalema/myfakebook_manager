@@ -56,6 +56,7 @@ class SongProvider with ChangeNotifier {
     // Validate song
     final errors = song.validate();
     if (errors) {
+      print('Song validation failed in provider');
       _setError('Invalid song data');
       return false;
     }
@@ -66,7 +67,9 @@ class SongProvider with ChangeNotifier {
     notifyListeners();
 
     try {
+      print('Calling database insertSong');
       final id = await _databaseHelper.insertSong(song);
+      print('Database insertSong returned id: $id');
       if (id > 0) {
         // Replace optimistic song with real one
         final index = _songs.indexWhere((s) => s.id == -1);
@@ -81,6 +84,7 @@ class SongProvider with ChangeNotifier {
       notifyListeners();
       return false;
     } catch (e) {
+      print('Database insertSong failed: $e');
       // Rollback optimistic update
       _songs.removeWhere((s) => s.id == -1);
       _setError('Failed to add song: $e');
