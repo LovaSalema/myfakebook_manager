@@ -1,0 +1,338 @@
+I/flutter (31141): Chord data received: (chord_dict, chords, detector_requested, ..., total_chords, total_processing_time)
+I/flutter (31141): Sending beat detection request...
+I/flutter (31141): Beat data received: (beats, bpm, detector_requested, ..., total_downbeats, total_processing_time)
+I/flutter (31141): Creating song from API data...
+I/flutter (31141): Debug: Received API data in createSongFromApiData: {chords: {chord_dict: submission, chords: [{chord: N, confidence: 1.0, end: 0.023219954648526078, start: 0.0}, {chord: G:min, confidence: 1.0, end: 3.5526530612244898, start: 0.023219954648526078}, {chord: Eb:maj, confidence: 1.0, end: 5.108390022675737, start: 3.5526530612244898}, {chord: Eb:maj/2, confidence: 1.0, end: 6.199727891156463, start: 5.108390022675737}, {chord: G:min, confidence: 1.0, end: 7.894784580498866, start: 6.199727891156463}, {chord: Eb:maj/3, confidence: 1.0, end: 9.287981859410431, start: 7.894784580498866}, {chord: Bb:maj, confidence: 1.0, end: 10.7740589569161, start: 9.287981859410431}, {chord: F:maj/3, confidence: 1.0, end: 11.795736961451247, start: 10.7740589569161}, {chord: Bb:maj, confidence: 1.0, end: 14.930430839002268, start: 11.795736961451247}, {chord: Eb:maj, confidence: 1.0, end: 16.69514739229025, start: 14.930430839002268}, {chord: D:min, confidence: 1.0, end: 17.507845804988662, start: 16.69514739229025}, {chord: Bb:
+I/flutter (31141): Total chords from API: 148
+I/flutter (31141): Total downbeats: 86
+I/flutter (31141): BPM: 142.85714285713743
+I/flutter (31141): Time signature: 4/4
+I/flutter (31141): Detected key: Bb
+I/flutter (31141): Song title: J Je veux n'être qu'à toi
+I/flutter (31141): Creating measures from 86 downbeats...
+I/flutter (31141): Assigned Eb to measure 0, beat 3
+I/flutter (31141): Assigned Ebmaj/2 to measure 1, beat 1
+I/flutter (31141): Assigned Gm to measure 1, beat 2
+I/flutter (31141): Assigned Ebmaj/3 to measure 1, beat 3
+I/flutter (31141): Assigned Bb to measure 2, beat 1
+I/flutter (31141): Assigned Fmaj/3 to measure 2, beat 2
+I/flutter (31141): Assigned Bb to measure 3, beat 0
+I/flutter (31141): Assigned Eb to measure 3, beat 3
+I/flutter (31141): Assigned Dm to measure 4, beat 1
+I/flutter (31141): Assigned Bb to measure 4, beat 2
+I/flutter (31141): Assigned Eb to measure 5, beat 1
+I/flutter (31141): Assigned F to measure 5, beat 2
+I/flutter (31141): Assigned Bb to measure 6, beat 0
+I/flutter (31141): Assigned Gm to measure 6, beat 2
+I/flutter (31141): Assigned Eb to measure 6, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 7, beat 1
+I/flutter (31141): Assigned Gm to measure 7, beat 2
+I/flutter (31141): Assigned Eb to measure 8, beat 0
+I/flutter (31141): Assigned Bb to measure 8, beat 1
+I/flutter (31141): Assigned F to measure 8, beat 2
+I/flutter (31141): Assigned Bb to measure 9, beat 0
+I/flutter (31141): Assigned Gm to measure 9, beat 2
+I/flutter (31141): Assigned Eb to measure 9, beat 3
+I/flutter (31141): Assigned F to measure 10, beat 1
+I/flutter (31141): Assigned Bb to measure 10, beat 2
+I/flutter (31141): Assigned Gm to measure 11, beat 0
+I/flutter (31141): Assigned Eb to measure 11, beat 1
+I/flutter (31141): Assigned F to measure 11, beat 2
+I/flutter (31141): Assigned Gm to measure 12, beat 0
+I/flutter (31141): Assigned Gmin/b7 to measure 12, beat 2
+I/flutter (31141): Assigned Eb to measure 12, beat 3
+I/flutter (31141): Assigned Gm to measure 13, beat 2
+I/flutter (31141): Assigned Fmaj/3 to measure 14, beat 1
+I/flutter (31141): Assigned Bb to measure 15, beat 0
+I/flutter (31141): Assigned Gm to measure 15, beat 1
+I/flutter (31141): Assigned Eb to measure 15, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 16, beat 1
+I/flutter (31141): Assigned Bb to measure 16, beat 2
+I/flutter (31141): Assigned Eb to measure 16, beat 3
+I/flutter (31141): Assigned Bb to measure 17, beat 1
+I/flutter (31141): Assigned F to measure 17, beat 2
+I/flutter (31141): Assigned Bb to measure 18, beat 0
+I/flutter (31141): Assigned Gm to measure 18, beat 2
+I/flutter (31141): Assigned Eb to measure 18, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 19, beat 0
+I/flutter (31141): Assigned Gm to measure 19, beat 2
+I/flutter (31141): Assigned Eb to measure 19, beat 3
+I/flutter (31141): Assigned Bb to measure 20, beat 1
+I/flutter (31141): Assigned F to measure 20, beat 2
+I/flutter (31141): Assigned Bb to measure 21, beat 0
+I/flutter (31141): Assigned Gm to measure 21, beat 2
+I/flutter (31141): Assigned Eb to measure 21, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 22, beat 1
+I/flutter (31141): Assigned Bb to measure 22, beat 2
+I/flutter (31141): Assigned Gm to measure 23, beat 0
+I/flutter (31141): Assigned Eb to measure 23, beat 1
+I/flutter (31141): Assigned F to measure 23, beat 2
+I/flutter (31141): Assigned Bb to measure 24, beat 0
+I/flutter (31141): Assigned Gm to measure 24, beat 2
+I/flutter (31141): Assigned Eb to measure 24, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 25, beat 0
+I/flutter (31141): Assigned Gm to measure 25, beat 2
+I/flutter (31141): Assigned Eb to measure 25, beat 3
+I/flutter (31141): Assigned Bb to measure 26, beat 1
+I/flutter (31141): Assigned F to measure 26, beat 2
+I/flutter (31141): Assigned Bb to measure 27, beat 0
+I/flutter (31141): Assigned Gm to measure 27, beat 2
+I/flutter (31141): Assigned Eb to measure 27, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 28, beat 1
+I/flutter (31141): Assigned Bb to measure 28, beat 2
+I/flutter (31141): Assigned Gm to measure 28, beat 3
+I/flutter (31141): Assigned Eb to measure 29, beat 1
+I/flutter (31141): Assigned F to measure 29, beat 2
+I/flutter (31141): Assigned Gm to measure 30, beat 0
+I/flutter (31141): Assigned Gmin/b7 to measure 30, beat 2
+I/flutter (31141): Assigned Eb to measure 30, beat 3
+I/flutter (31141): Assigned Gm to measure 31, beat 2
+I/flutter (31141): Assigned Fmaj/3 to measure 32, beat 1
+I/flutter (31141): Assigned Bb to measure 33, beat 0
+I/flutter (31141): Assigned Gm to measure 33, beat 1
+I/flutter (31141): Assigned Eb to measure 33, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 34, beat 1
+I/flutter (31141): Assigned Ab to measure 34, beat 2
+I/flutter (31141): Assigned Ebmaj/3 to measure 35, beat 1
+I/flutter (31141): Assigned Ab to measure 36, beat 0
+I/flutter (31141): Assigned Ebmaj/3 to measure 36, beat 1
+I/flutter (31141): Assigned Eb to measure 36, beat 2
+I/flutter (31141): Assigned F to measure 36, beat 3
+I/flutter (31141): Assigned Bb to measure 36, beat 3
+I/flutter (31141): Assigned Ab to measure 38, beat 1
+I/flutter (31141): Assigned Ebmaj/3 to measure 39, beat 3
+I/flutter (31141): Assigned Ab to measure 41, beat 2
+I/flutter (31141): Assigned Ebmaj/3 to measure 41, beat 3
+I/flutter (31141): Assigned Eb to measure 42, beat 1
+I/flutter (31141): Assigned F to measure 42, beat 2
+I/flutter (31141): Assigned Bb to measure 44, beat 1
+I/flutter (31141): Assigned Gm to measure 45, beat 1
+I/flutter (31141): Assigned Eb to measure 45, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 46, beat 3
+I/flutter (31141): Assigned Gm to measure 47, beat 1
+I/flutter (31141): Assigned Eb to measure 48, beat 0
+I/flutter (31141): Assigned Bb to measure 48, beat 3
+I/flutter (31141): Assigned F to measure 49, beat 3
+I/flutter (31141): Assigned Bb to measure 50, beat 1
+I/flutter (31141): Assigned Gm to measure 51, beat 1
+I/flutter (31141): Assigned Eb to measure 52, beat 0
+I/flutter (31141): Assigned Fmaj/3 to measure 52, beat 3
+I/flutter (31141): Assigned Bb to measure 53, beat 1
+I/flutter (31141): Assigned Gm to measure 54, beat 1
+I/flutter (31141): Assigned Eb to measure 55, beat 0
+I/flutter (31141): Assigned F to measure 55, beat 3
+I/flutter (31141): Assigned Bb to measure 56, beat 1
+I/flutter (31141): Assigned Gm to measure 57, beat 1
+I/flutter (31141): Assigned Eb to measure 57, beat 3
+I/flutter (31141): Assigned F to measure 58, beat 3
+I/flutter (31141): Assigned Gm to measure 59, beat 1
+I/flutter (31141): Assigned Eb to measure 60, beat 0
+I/flutter (31141): Assigned Bb to measure 60, beat 3
+I/flutter (31141): Assigned F to measure 61, beat 2
+I/flutter (31141): Assigned Bb to measure 62, beat 1
+I/flutter (31141): Assigned Gm to measure 63, beat 1
+I/flutter (31141): Assigned Eb to measure 63, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 64, beat 3
+I/flutter (31141): Assigned Bb to measure 65, beat 1
+I/flutter (31141): Assigned Gm to measure 66, beat 1
+I/flutter (31141): Assigned Eb to measure 66, beat 3
+I/flutter (31141): Assigned F to measure 67, beat 3
+I/flutter (31141): Assigned Gm to measure 68, beat 1
+I/flutter (31141): Assigned Gmin/b7 to measure 69, beat 1
+I/flutter (31141): Assigned Eb to measure 69, beat 3
+I/flutter (31141): Assigned Gm to measure 71, beat 1
+I/flutter (31141): Assigned F to measure 72, beat 3
+I/flutter (31141): Assigned Bb to measure 74, beat 1
+I/flutter (31141): Assigned Gm to measure 75, beat 0
+I/flutter (31141): Assigned Eb to measure 75, beat 3
+I/flutter (31141): Assigned Fmaj/3 to measure 76, beat 2
+I/flutter (31141): Assigned Bb to measure 77, beat 1
+I/flutter (31141): Assigned Gm to measure 78, beat 1
+I/flutter (31141): Assigned Eb to measure 78, beat 3
+I/flutter (31141): Assigned F to measure 79, beat 2
+I/flutter (31141): Assigned Bb to measure 80, beat 1
+I/flutter (31141): Assigned Gm to measure 81, beat 0
+I/flutter (31141): Assigned Eb to measure 81, beat 3
+I/flutter (31141): Assigned F to measure 82, beat 2
+I/flutter (31141): Assigned Ab to measure 83, beat 1
+I/flutter (31141): Assigned Ebmaj/3 to measure 84, beat 3
+I/flutter (31141): Created 85 measures
+I/flutter (31141): Measure 0: chords=[, , , Eb], order=0
+I/flutter (31141): Measure 1: chords=[, Ebmaj/2, Gm, Ebmaj/3], order=1
+I/flutter (31141): Measure 2: chords=[, Bb, Fmaj/3, ], order=2
+I/flutter (31141): Measure 3: chords=[Bb, , , Eb], order=3
+I/flutter (31141): Measure 4: chords=[, Dm, Bb, ], order=4
+I/flutter (31141): Measure 5: chords=[, Eb, F, ], order=5
+I/flutter (31141): Measure 6: chords=[Bb, , Gm, Eb], order=6
+I/flutter (31141): Measure 7: chords=[, Fmaj/3, Gm, ], order=7
+I/flutter (31141): Measure 8: chords=[Eb, Bb, F, ], order=8
+I/flutter (31141): Measure 9: chords=[Bb, , Gm, Eb], order=9
+I/flutter (31141): Measure 10: chords=[, F, Bb, ], order=10
+I/flutter (31141): Measure 11: chords=[Gm, Eb, F, ], order=11
+I/flutter (31141): Measure 12: chords=[Gm, , Gmin/b7, Eb], order=12
+I/flutter (31141): Measure 13: chords=[, , Gm, ], order=13
+I/flutter (31141): Measure 14: chords=[, Fmaj/3, , ], order=14
+I/flutter (31141): Measure 15: chords=[Bb, Gm, , Eb], order=15
+I/flutter (31141): Measure 16: chords=[, Fmaj/3, Bb, Eb], order=16
+I/flutter (31141): Measure 17: chords=[, Bb, F, ], order=17
+I/flutter (31141): Measure 18: chords=[Bb, , Gm, Eb], order=18
+I/flutter (31141): Measure 19: chords=[Fmaj/3, , Gm, Eb], order=19
+I/flutter (31141): Measure 20: chords=[, Bb, F, ], order=20
+I/flutter (31141): Measure 21: chords=[Bb, , Gm, Eb], order=21
+I/flutter (31141): Measure 22: chords=[, Fmaj/3, Bb, ], order=22
+I/flutter (31141): Measure 23: chords=[Gm, Eb, F, ], order=23
+I/flutter (31141): Measure 24: chords=[Bb, , Gm, Eb], order=24
+I/flutter (31141): Measure 25: chords=[Fmaj/3, , Gm, Eb], order=25
+I/flutter (31141): Measure 26: chords=[, Bb, F, ], order=26
+I/flutter (31141): Measure 27: chords=[Bb, , Gm, Eb], order=27
+I/flutter (31141): Measure 28: chords=[, Fmaj/3, Bb, Gm], order=28
+I/flutter (31141): Measure 29: chords=[, Eb, F, ], order=29
+I/flutter (31141): Measure 30: chords=[Gm, , Gmin/b7, Eb], order=30
+I/flutter (31141): Measure 31: chords=[, , Gm, ], order=31
+I/flutter (31141): Measure 32: chords=[, Fmaj/3, , ], order=32
+I/flutter (31141): Measure 33: chords=[Bb, Gm, , Eb], order=33
+I/flutter (31141): Measure 34: chords=[, Fmaj/3, Ab, ], order=34
+I/flutter (31141): Measure 35: chords=[, Ebmaj/3, , ], order=35
+I/flutter (31141): Measure 36: chords=[Ab, Ebmaj/3, Eb, Bb], order=36
+I/flutter (31141): Measure 37: chords=[Bb, , , ], order=37
+I/flutter (31141): Measure 38: chords=[, Ab, , ], order=38
+I/flutter (31141): Measure 39: chords=[, , , Ebmaj/3], order=39
+I/flutter (31141): Measure 40: chords=[Ebmaj/3, , , ], order=40
+I/flutter (31141): Measure 41: chords=[, , Ab, Ebmaj/3], order=41
+I/flutter (31141): Measure 42: chords=[, Eb, F, ], order=42
+I/flutter (31141): Measure 43: chords=[F, , , ], order=43
+I/flutter (31141): Measure 44: chords=[, Bb, , ], order=44
+I/flutter (31141): Measure 45: chords=[, Gm, , Eb], order=45
+I/flutter (31141): Measure 46: chords=[, , , Fmaj/3], order=46
+I/flutter (31141): Measure 47: chords=[, Gm, , ], order=47
+I/flutter (31141): Measure 48: chords=[Eb, , , Bb], order=48
+I/flutter (31141): Measure 49: chords=[, , , F], order=49
+I/flutter (31141): Measure 50: chords=[, Bb, , ], order=50
+I/flutter (31141): Measure 51: chords=[, Gm, , ], order=51
+I/flutter (31141): Measure 52: chords=[Eb, , , Fmaj/3], order=52
+I/flutter (31141): Measure 53: chords=[, Bb, , ], order=53
+I/flutter (31141): Measure 54: chords=[, Gm, , ], order=54
+I/flutter (31141): Measure 55: chords=[Eb, , , F], order=55
+I/flutter (31141): Measure 56: chords=[, Bb, , ], order=56
+I/flutter (31141): Measure 57: chords=[, Gm, , Eb], order=57
+I/flutter (31141): Measure 58: chords=[, , , F], order=58
+I/flutter (31141): Measure 59: chords=[, Gm, , ], order=59
+I/flutter (31141): Measure 60: chords=[Eb, , , Bb], order=60
+I/flutter (31141): Measure 61: chords=[, , F, ], order=61
+I/flutter (31141): Measure 62: chords=[, Bb, , ], order=62
+I/flutter (31141): Measure 63: chords=[, Gm, , Eb], order=63
+I/flutter (31141): Measure 64: chords=[, , , Fmaj/3], order=64
+I/flutter (31141): Measure 65: chords=[, Bb, , ], order=65
+I/flutter (31141): Measure 66: chords=[, Gm, , Eb], order=66
+I/flutter (31141): Measure 67: chords=[, , , F], order=67
+I/flutter (31141): Measure 68: chords=[, Gm, , ], order=68
+I/flutter (31141): Measure 69: chords=[, Gmin/b7, , Eb], order=69
+I/flutter (31141): Measure 70: chords=[Eb, , , ], order=70
+I/flutter (31141): Measure 71: chords=[, Gm, , ], order=71
+I/flutter (31141): Measure 72: chords=[, , , F], order=72
+I/flutter (31141): Measure 73: chords=[F, , , ], order=73
+I/flutter (31141): Measure 74: chords=[, Bb, , ], order=74
+I/flutter (31141): Measure 75: chords=[Gm, , , Eb], order=75
+I/flutter (31141): Measure 76: chords=[, , Fmaj/3, ], order=76
+I/flutter (31141): Measure 77: chords=[, Bb, , ], order=77
+I/flutter (31141): Measure 78: chords=[, Gm, , Eb], order=78
+I/flutter (31141): Measure 79: chords=[, , F, ], order=79
+I/flutter (31141): Measure 80: chords=[, Bb, , ], order=80
+I/flutter (31141): Measure 81: chords=[Gm, , , Eb], order=81
+I/flutter (31141): Measure 82: chords=[, , F, ], order=82
+I/flutter (31141): Measure 83: chords=[, Ab, , ], order=83
+I/flutter (31141): Measure 84: chords=[, , , Ebmaj/3], order=84
+I/flutter (31141): Section validation: true
+I/flutter (31141): Final song validation: true
+I/flutter (31141): Song created: title=J Je veux n'être qu'à toi, artist=Unknown, key=Bb, timeSig=4/4, tempo=143
+I/flutter (31141): Sections count: 1
+I/flutter (31141): Section: type=VERSE, label=A, measures=85
+I/flutter (31141): Measure: order=0, chords=[, , , Eb]
+I/flutter (31141): Measure: order=1, chords=[, Ebmaj/2, Gm, Ebmaj/3]
+I/flutter (31141): Measure: order=2, chords=[, Bb, Fmaj/3, ]
+I/flutter (31141): Measure: order=3, chords=[Bb, , , Eb]
+I/flutter (31141): Measure: order=4, chords=[, Dm, Bb, ]
+I/flutter (31141): Measure: order=5, chords=[, Eb, F, ]
+I/flutter (31141): Measure: order=6, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=7, chords=[, Fmaj/3, Gm, ]
+I/flutter (31141): Measure: order=8, chords=[Eb, Bb, F, ]
+I/flutter (31141): Measure: order=9, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=10, chords=[, F, Bb, ]
+I/flutter (31141): Measure: order=11, chords=[Gm, Eb, F, ]
+I/flutter (31141): Measure: order=12, chords=[Gm, , Gmin/b7, Eb]
+I/flutter (31141): Measure: order=13, chords=[, , Gm, ]
+I/flutter (31141): Measure: order=14, chords=[, Fmaj/3, , ]
+I/flutter (31141): Measure: order=15, chords=[Bb, Gm, , Eb]
+I/flutter (31141): Measure: order=16, chords=[, Fmaj/3, Bb, Eb]
+I/flutter (31141): Measure: order=17, chords=[, Bb, F, ]
+I/flutter (31141): Measure: order=18, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=19, chords=[Fmaj/3, , Gm, Eb]
+I/flutter (31141): Measure: order=20, chords=[, Bb, F, ]
+I/flutter (31141): Measure: order=21, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=22, chords=[, Fmaj/3, Bb, ]
+I/flutter (31141): Measure: order=23, chords=[Gm, Eb, F, ]
+I/flutter (31141): Measure: order=24, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=25, chords=[Fmaj/3, , Gm, Eb]
+I/flutter (31141): Measure: order=26, chords=[, Bb, F, ]
+I/flutter (31141): Measure: order=27, chords=[Bb, , Gm, Eb]
+I/flutter (31141): Measure: order=28, chords=[, Fmaj/3, Bb, Gm]
+I/flutter (31141): Measure: order=29, chords=[, Eb, F, ]
+I/flutter (31141): Measure: order=30, chords=[Gm, , Gmin/b7, Eb]
+I/flutter (31141): Measure: order=31, chords=[, , Gm, ]
+I/flutter (31141): Measure: order=32, chords=[, Fmaj/3, , ]
+I/flutter (31141): Measure: order=33, chords=[Bb, Gm, , Eb]
+I/flutter (31141): Measure: order=34, chords=[, Fmaj/3, Ab, ]
+I/flutter (31141): Measure: order=35, chords=[, Ebmaj/3, , ]
+I/flutter (31141): Measure: order=36, chords=[Ab, Ebmaj/3, Eb, Bb]
+I/flutter (31141): Measure: order=37, chords=[Bb, , , ]
+I/flutter (31141): Measure: order=38, chords=[, Ab, , ]
+I/flutter (31141): Measure: order=39, chords=[, , , Ebmaj/3]
+I/flutter (31141): Measure: order=40, chords=[Ebmaj/3, , , ]
+I/flutter (31141): Measure: order=41, chords=[, , Ab, Ebmaj/3]
+I/flutter (31141): Measure: order=42, chords=[, Eb, F, ]
+I/flutter (31141): Measure: order=43, chords=[F, , , ]
+I/flutter (31141): Measure: order=44, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=45, chords=[, Gm, , Eb]
+I/flutter (31141): Measure: order=46, chords=[, , , Fmaj/3]
+I/flutter (31141): Measure: order=47, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=48, chords=[Eb, , , Bb]
+I/flutter (31141): Measure: order=49, chords=[, , , F]
+I/flutter (31141): Measure: order=50, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=51, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=52, chords=[Eb, , , Fmaj/3]
+I/flutter (31141): Measure: order=53, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=54, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=55, chords=[Eb, , , F]
+I/flutter (31141): Measure: order=56, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=57, chords=[, Gm, , Eb]
+I/flutter (31141): Measure: order=58, chords=[, , , F]
+I/flutter (31141): Measure: order=59, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=60, chords=[Eb, , , Bb]
+I/flutter (31141): Measure: order=61, chords=[, , F, ]
+I/flutter (31141): Measure: order=62, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=63, chords=[, Gm, , Eb]
+I/flutter (31141): Measure: order=64, chords=[, , , Fmaj/3]
+I/flutter (31141): Measure: order=65, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=66, chords=[, Gm, , Eb]
+I/flutter (31141): Measure: order=67, chords=[, , , F]
+I/flutter (31141): Measure: order=68, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=69, chords=[, Gmin/b7, , Eb]
+I/flutter (31141): Measure: order=70, chords=[Eb, , , ]
+I/flutter (31141): Measure: order=71, chords=[, Gm, , ]
+I/flutter (31141): Measure: order=72, chords=[, , , F]
+I/flutter (31141): Measure: order=73, chords=[F, , , ]
+I/flutter (31141): Measure: order=74, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=75, chords=[Gm, , , Eb]
+I/flutter (31141): Measure: order=76, chords=[, , Fmaj/3, ]
+I/flutter (31141): Measure: order=77, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=78, chords=[, Gm, , Eb]
+I/flutter (31141): Measure: order=79, chords=[, , F, ]
+I/flutter (31141): Measure: order=80, chords=[, Bb, , ]
+I/flutter (31141): Measure: order=81, chords=[Gm, , , Eb]
+I/flutter (31141): Measure: order=82, chords=[, , F, ]
+I/flutter (31141): Measure: order=83, chords=[, Ab, , ]
+I/flutter (31141): Measure: order=84, chords=[, , , Ebmaj/3]
+I/flutter (31141): Validating song...
+I/flutter (31141): Song validation passed
+I/flutter (31141): Calling database insertSong
+I/flutter (31141): Database insertSong returned id: 6
