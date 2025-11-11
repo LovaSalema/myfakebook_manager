@@ -91,6 +91,7 @@ class ChordExtractionService {
   Song createSongFromApiData(Map<String, dynamic> apiData, String fileName) {
     try {
       print('Creating song from API data...');
+      print('Debug: Received API data in createSongFromApiData: $apiData');
       final chordData = apiData['chords'];
       final beatData = apiData['beats'];
 

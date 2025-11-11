@@ -788,9 +788,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const ExtractSongScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => ExtractSongScreen()),
                 );
               },
               child: const Text('Extraire par audio ou URL'),
