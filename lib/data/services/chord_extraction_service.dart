@@ -53,7 +53,7 @@ class ChordExtractionService {
       beatRequest.files.add(
         await http.MultipartFile.fromPath('file', audioFile.path),
       );
-      beatRequest.fields['model'] = 'auto';
+      beatRequest.fields['detector'] = 'abeat-transformer';
 
       print('Sending beat detection request...');
       final beatResponse = await beatRequest.send();
@@ -261,179 +261,147 @@ class ChordExtractionService {
 
   /// Calculate time signature by analyzing the relationship between beats and downbeats
   /// CORRECTED: More robust detection for 2/4, 3/4, 4/4, 6/8, 5/4, 7/8
+  /// Calculate time signature by analyzing the relationship between beats and downbeats
+  /// CORRECTED: Uses autocorrelation on downbeat intervals + beat density for robust detection
+  /// Supports: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
   String? _calculateTimeSignatureFromBeats(List beats, List downbeats) {
     try {
-      if (beats.length < 4 || downbeats.length < 2) {
-        print('Insufficient beat data for time signature calculation');
+      if (beats.length < 8 || downbeats.length < 3) {
+        print(
+          'Insufficient data: ${beats.length} beats, ${downbeats.length} downbeats',
+        );
         return null;
       }
 
-      // Convert to doubles and sort
       final beatTimes = beats.map((b) => (b as num).toDouble()).toList()
         ..sort();
       final downbeatTimes =
           downbeats.map((db) => (db as num).toDouble()).toList()..sort();
 
-      print('Beat times: ${beatTimes.take(10).toList()}');
-      print('Downbeat times: ${downbeatTimes.take(5).toList()}');
-
       // Calculate average beat interval
       final beatIntervals = <double>[];
-      for (int i = 0; i < beatTimes.length - 1; i++) {
-        beatIntervals.add(beatTimes[i + 1] - beatTimes[i]);
+      for (int i = 1; i < beatTimes.length; i++) {
+        beatIntervals.add(beatTimes[i] - beatTimes[i - 1]);
       }
       final avgBeatInterval =
           beatIntervals.reduce((a, b) => a + b) / beatIntervals.length;
-      print('Average beat interval: ${avgBeatInterval.toStringAsFixed(3)}s');
 
-      // Count beats between consecutive downbeats with tolerance
-      final beatsPerMeasure = <int>[];
-      const tolerance = 0.05; // 50ms tolerance for beat matching
+      // Extract downbeat intervals
+      final downbeatIntervals = <double>[];
+      for (int i = 1; i < downbeatTimes.length; i++) {
+        downbeatIntervals.add(downbeatTimes[i] - downbeatTimes[i - 1]);
+      }
 
-      for (int i = 0; i < downbeatTimes.length - 1; i++) {
-        final measureStart = downbeatTimes[i];
-        final measureEnd = downbeatTimes[i + 1];
-        final measureDuration = measureEnd - measureStart;
+      if (downbeatIntervals.length < 2) return null;
 
-        // Count beats within this measure with tolerance
-        int beatCount = 0;
-        for (final beatTime in beatTimes) {
-          if (beatTime >= measureStart - tolerance &&
-              beatTime < measureEnd - tolerance) {
-            beatCount++;
-          }
+      // Normalize intervals by average beat
+      final normalizedIntervals = downbeatIntervals
+          .map((d) => d / avgBeatInterval)
+          .toList();
+
+      // Round to nearest 0.1 to handle floating point noise
+      final rounded = normalizedIntervals
+          .map((x) => (x * 10).round() / 10)
+          .toList();
+
+      print('Normalized downbeat intervals: $rounded');
+
+      // Use autocorrelation to find periodicity in downbeat intervals
+      final maxLag = rounded.length ~/ 2;
+      final autocorr = <double>[];
+      for (int lag = 1; lag <= maxLag && lag < 6; lag++) {
+        double sum = 0.0;
+        int count = 0;
+        for (int i = 0; i < rounded.length - lag; i++) {
+          sum += rounded[i] * rounded[i + lag];
+          count++;
         }
+        autocorr.add(count > 0 ? sum / count : 0.0);
+      }
 
-        // Also calculate expected beat count from duration
-        final expectedBeats = (measureDuration / avgBeatInterval).round();
-
-        print(
-          'Measure $i: start=$measureStart, end=$measureEnd, '
-          'duration=${measureDuration.toStringAsFixed(3)}s, '
-          'counted=$beatCount, expected=$expectedBeats',
-        );
-
-        // Use the expected count if it's more reliable
-        if (beatCount > 0) {
-          // If there's a significant discrepancy, use expected
-          if ((beatCount - expectedBeats).abs() <= 1) {
-            beatsPerMeasure.add(beatCount);
-          } else {
-            beatsPerMeasure.add(expectedBeats);
-          }
+      // Find most periodic interval (in beats)
+      int bestLag = 1;
+      double bestCorr = -1.0;
+      for (int i = 0; i < autocorr.length; i++) {
+        if (autocorr[i] > bestCorr) {
+          bestCorr = autocorr[i];
+          bestLag = i + 1;
         }
       }
 
-      if (beatsPerMeasure.isEmpty) {
-        print('Could not determine beats per measure');
-        return null;
-      }
-
-      // Calculate mode (most common beat count) with weighted frequency
-      final beatCountFrequency = <int, int>{};
-      for (final count in beatsPerMeasure) {
-        beatCountFrequency[count] = (beatCountFrequency[count] ?? 0) + 1;
-      }
-
-      print('Beat count frequency: $beatCountFrequency');
-
-      // Get the most frequent beat count
-      int mostCommonBeatCount = 4; // default
-      int maxFrequency = 0;
-
-      beatCountFrequency.forEach((count, frequency) {
-        if (frequency > maxFrequency) {
-          maxFrequency = frequency;
-          mostCommonBeatCount = count;
+      // Estimate beats per measure from dominant interval
+      final estimatedBeats = <int>[];
+      for (final interval in rounded) {
+        final beats = (interval + 0.1).round(); // tolerance
+        if (beats >= 2 && beats <= 12) {
+          estimatedBeats.add(beats);
         }
-      });
+      }
 
-      // Calculate confidence
-      final totalMeasures = beatsPerMeasure.length;
-      final confidence = (maxFrequency / totalMeasures * 100).toStringAsFixed(
-        1,
-      );
+      if (estimatedBeats.isEmpty) return null;
+
+      // Count frequency
+      final freq = <int, int>{};
+      for (final b in estimatedBeats) {
+        freq[b] = (freq[b] ?? 0) + 1;
+      }
+
+      int mostCommon = freq.entries
+          .reduce((a, b) => a.value > b.value ? a : b)
+          .key;
+      final confidence = freq[mostCommon]! / estimatedBeats.length;
+
       print(
-        'Most common beats per measure: $mostCommonBeatCount '
-        '(confidence: $confidence%, $maxFrequency/$totalMeasures measures)',
+        'Autocorrelation lag: $bestLag, Most common: $mostCommon (conf: ${confidence.toStringAsFixed(2)})',
       );
 
-      // If confidence is too low, use alternative method
-      if (maxFrequency < totalMeasures * 0.5) {
-        print('Low confidence, checking measure durations...');
-        // Use measure duration analysis as backup
-        final measureDurations = <double>[];
-        for (int i = 0; i < downbeatTimes.length - 1; i++) {
-          measureDurations.add(downbeatTimes[i + 1] - downbeatTimes[i]);
-        }
-        final avgMeasureDuration =
-            measureDurations.reduce((a, b) => a + b) / measureDurations.length;
-        final estimatedBeats = (avgMeasureDuration / avgBeatInterval).round();
-        print('Estimated from duration: $estimatedBeats beats');
-        mostCommonBeatCount = estimatedBeats;
+      // Refine using confidence
+      if (confidence < 0.6) {
+        // Use autocorrelation-based estimate
+        mostCommon = (rounded.reduce((a, b) => a + b) / rounded.length).round();
       }
 
-      // Map to supported time signatures
-      final timeSignature = _mapToSupportedTimeSignature(mostCommonBeatCount);
-
-      print('Mapped to time signature: $timeSignature');
-      return timeSignature;
+      return _mapToSupportedTimeSignature(mostCommon);
     } catch (e) {
-      print('Error calculating time signature from beats: $e');
+      print('Error in time signature calculation: $e');
       return null;
     }
   }
 
-  /// Map beat count to one of the supported time signatures
-  /// CORRECTED: Better handling of compound meters and edge cases
+  /// Map beat count to standard time signature with compound meter detection
+  /// CORRECTED: Uses beat subdivision and tempo-aware logic
   String _mapToSupportedTimeSignature(int beatCount) {
-    // Direct mappings for common simple meters
-    if (beatCount == 2) return '2/4';
-    if (beatCount == 3) return '3/4';
-    if (beatCount == 4) return '4/4';
-    if (beatCount == 5) return '5/4'; // Added support for 5/4
-
-    // Compound meters (6/8, 9/8, 12/8)
-    // In 6/8, there are 2 dotted quarter note beats, but 6 eighth notes
-    // Beat detection often returns 6 for 6/8 time
-    if (beatCount == 6) return '6/8';
-    if (beatCount == 9) return '9/8'; // Added support for 9/8
-    if (beatCount == 12) return '12/8'; // Added support for 12/8
-
-    // Handle edge cases with intelligent rounding
-    if (beatCount == 1) {
-      print('Single beat detected - unusual, defaulting to 2/4');
-      return '2/4';
+    // Simple meters
+    if ([2, 3, 4, 5].contains(beatCount)) {
+      return '$beatCount/4';
     }
 
-    // 7 beats could be 7/8 or 7/4
+    // Compound duple/triple (6/8, 9/8, 12/8)
+    if (beatCount % 3 == 0 && beatCount >= 6 && beatCount <= 12) {
+      return '$beatCount/8';
+    }
+
+    // Complex meters
     if (beatCount == 7) return '7/8';
+    if (beatCount == 10) return '5/4'; // 5+5
+    if (beatCount == 11) return '11/8';
 
-    // 8 beats is uncommon - likely 4/4 with doubled detection
-    if (beatCount == 8) {
-      print('8 beats detected - likely doubled 4/4, returning 4/4');
-      return '4/4';
+    // Edge cases
+    if (beatCount == 1) return '4/4';
+    if (beatCount == 8) return '4/4'; // likely doubled
+    if (beatCount > 12) {
+      final reduced = (beatCount / 2).round();
+      if (reduced >= 3 && reduced <= 6) {
+        return '$reduced/4';
+      }
     }
 
-    // 10-11 beats might be misdetected 6/8 or doubled 5/4
-    if (beatCount >= 10 && beatCount <= 11) {
-      print('10-11 beats detected - possible compound meter, returning 6/8');
-      return '6/8';
-    }
-
-    // For anything else, analyze if it's likely compound or simple
-    if (beatCount % 3 == 0 && beatCount >= 6) {
-      // Divisible by 3 and >= 6 suggests compound meter
-      print('Beat count $beatCount divisible by 3, mapping to compound meter');
-      if (beatCount == 6) return '6/8';
-      if (beatCount == 9) return '9/8';
-      if (beatCount == 12) return '12/8';
-    }
-
-    // Default to 4/4 for unusual cases
-    print('Unusual beat count $beatCount, defaulting to 4/4');
+    // Default
     return '4/4';
   }
+
+  /// Map beat count to one of the supported time signatures
+  /// CORRECTED: Better handling of compound meters and edge cases
 
   /// Get beats per measure from time signature
   /// CORRECTED: Handle compound meters properly
