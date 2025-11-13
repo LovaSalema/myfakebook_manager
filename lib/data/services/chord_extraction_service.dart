@@ -87,7 +87,117 @@ class ChordExtractionService {
     }
   }
 
-  /// Convert API data to Song object
+  /// NEW: Organize chord data into a grid structure for easy UI display
+  /// Returns a 2D grid where:
+  /// - Each row represents a line in the UI (typically 4 measures)
+  /// - Each column represents a beat position
+  /// - Grid structure: List<List<ChordCell>>
+  Map<String, dynamic> organizeIntoGrid(
+    Map<String, dynamic> apiData,
+    String fileName, {
+    int measuresPerRow = 4,
+    int? maxMeasures,
+  }) {
+    try {
+      print('Organizing chord data into grid...');
+
+      final chordData = apiData['chords'];
+      final beatData = apiData['beats'];
+
+      if (chordData == null || beatData == null) {
+        throw Exception('Missing API data');
+      }
+
+      final chords = chordData['chords'] as List;
+      final downbeats = beatData['downbeats'] as List;
+      final bpm = (beatData['bpm'] as num?)?.toDouble() ?? 120.0;
+
+      final timeSignature = _parseTimeSignature(
+        beatData['time_signature'],
+        beatData['beats'],
+        downbeats,
+      );
+
+      final beatsPerMeasure = _getBeatsPerMeasure(timeSignature);
+
+      // Create measures from downbeats
+      final measures = _createMeasuresFromDownbeats(
+        chords,
+        downbeats,
+        timeSignature,
+      );
+
+      // Limit measures if specified
+      final finalMeasures = maxMeasures != null && maxMeasures < measures.length
+          ? measures.sublist(0, maxMeasures)
+          : measures;
+
+      // Organize into grid rows
+      final grid = <Map<String, dynamic>>[];
+
+      for (int i = 0; i < finalMeasures.length; i += measuresPerRow) {
+        final endIndex = (i + measuresPerRow).clamp(0, finalMeasures.length);
+        final rowMeasures = finalMeasures.sublist(i, endIndex);
+
+        // Flatten measures into a single row of cells
+        final rowCells = <Map<String, dynamic>>[];
+
+        for (int mIdx = 0; mIdx < rowMeasures.length; mIdx++) {
+          final measure = rowMeasures[mIdx];
+
+          for (int beatIdx = 0; beatIdx < measure.chords.length; beatIdx++) {
+            rowCells.add({
+              'chord': measure.chords[beatIdx],
+              'measureIndex': i + mIdx,
+              'beatIndex': beatIdx,
+              'isDownbeat': beatIdx == 0,
+              'isEmpty': measure.chords[beatIdx].isEmpty,
+            });
+          }
+        }
+
+        grid.add({
+          'rowIndex': grid.length,
+          'measureStartIndex': i,
+          'measureEndIndex': endIndex - 1,
+          'cells': rowCells,
+          'measuresInRow': rowMeasures.length,
+        });
+      }
+
+      // Detect key and extract metadata
+      final detectedKey = _detectKey(chords);
+      final title = _extractTitleFromFileName(fileName);
+
+      return {
+        'grid': grid,
+        'metadata': {
+          'title': title,
+          'artist': 'Unknown',
+          'key': detectedKey,
+          'timeSignature': timeSignature,
+          'bpm': bpm.round(),
+          'beatsPerMeasure': beatsPerMeasure,
+          'totalMeasures': finalMeasures.length,
+          'measuresPerRow': measuresPerRow,
+        },
+        'rawMeasures': finalMeasures
+            .map(
+              (m) => {
+                'chords': m.chords,
+                'measureOrder': m.measureOrder,
+                'timeSignature': m.timeSignature,
+              },
+            )
+            .toList(),
+      };
+    } catch (e) {
+      print('Error in organizeIntoGrid: $e');
+      throw Exception('Error organizing chord grid: $e');
+    }
+  }
+
+  /// Convert API data to Song object (original method)
   Song createSongFromApiData(Map<String, dynamic> apiData, String fileName) {
     try {
       print('Creating song from API data...');
@@ -185,9 +295,7 @@ class ChordExtractionService {
   }
 
   /// Parse and validate time signature from API
-  /// Use the time signature directly from API as the data is correct
   String _parseTimeSignature(dynamic timeSig, List? beats, List? downbeats) {
-    // Use the time signature directly from API
     if (timeSig == null) {
       print('No time signature provided, defaulting to 4/4');
       return '4/4';
@@ -195,27 +303,22 @@ class ChordExtractionService {
 
     String timeSignature;
 
-    // Handle different formats from API
     if (timeSig is String) {
       timeSignature = timeSig;
     } else if (timeSig is int) {
-      // If API returns just the numerator (e.g., 4), assume /4 denominator
       timeSignature = '$timeSig/4';
     } else if (timeSig is List && timeSig.length >= 2) {
-      // If API returns [numerator, denominator]
       timeSignature = '${timeSig[0]}/${timeSig[1]}';
     } else {
       print('Unexpected time signature format: $timeSig, defaulting to 4/4');
       return '4/4';
     }
 
-    // Validate format
     if (!RegExp(r'^\d+/\d+$').hasMatch(timeSignature)) {
       print('Invalid time signature format: $timeSignature, defaulting to 4/4');
       return '4/4';
     }
 
-    // Parse and validate values
     final parts = timeSignature.split('/');
     final numerator = int.tryParse(parts[0]);
 
@@ -226,43 +329,30 @@ class ChordExtractionService {
       return '4/4';
     }
 
-    // Validate numerator (typically 1-16)
     if (numerator < 1 || numerator > 16) {
       print('Invalid numerator: $numerator, defaulting to 4/4');
       return '4/4';
     }
 
-    // Trust the API's time signature as it's correct
     print('Using time signature from API: $timeSignature');
     return timeSignature;
   }
 
-  /// Map beat count to one of the supported time signatures
-  /// CORRECTED: Better handling of compound meters and edge cases
-
   /// Get beats per measure from time signature
-  /// CORRECTED: Handle compound meters properly
   int _getBeatsPerMeasure(String timeSignature) {
     final parts = timeSignature.split('/');
     final numerator = int.parse(parts[0]);
-    final denominator = int.parse(parts[1]);
-
-    // For compound meters (x/8 where x is divisible by 3),
-    // the numerator represents eighth notes, not beats
-    // But for our chord display purposes, we use the numerator
-    // Example: 6/8 has 6 eighth notes (or 2 dotted quarter beats)
-    // but we display 6 chord positions
     return numerator;
   }
 
   /// Convert chord from API format to display format
-  /// API format: "E:maj", "C#:min", "F#:min7", "B:7"
-  /// Display format: "E", "C#m", "F#m7", "B7"
   String _convertChordFormat(String apiChord) {
-    if (apiChord == 'N') return '';
+    if (apiChord == 'N') {
+      return '%';
+    }
 
     if (!apiChord.contains(':')) {
-      return apiChord; // Already in display format or invalid
+      return apiChord;
     }
 
     final parts = apiChord.split(':');
@@ -271,41 +361,34 @@ class ChordExtractionService {
     final root = parts[0];
     final quality = parts[1];
 
-    // Handle minor chords
     if (quality.startsWith('min')) {
-      final extension = quality.substring(3); // Get everything after "min"
+      final extension = quality.substring(3);
       return '$root${extension.isEmpty ? 'm' : 'm$extension'}';
     }
 
-    // Handle major chords
     if (quality.startsWith('maj')) {
-      final extension = quality.substring(3); // Get everything after "maj"
+      final extension = quality.substring(3);
       return '$root$extension';
     }
 
-    // Handle diminished
     if (quality.startsWith('dim')) {
       final extension = quality.substring(3);
       return '$root${extension.isEmpty ? '°' : '°$extension'}';
     }
 
-    // Handle augmented
     if (quality.startsWith('aug')) {
       final extension = quality.substring(3);
       return '$root${extension.isEmpty ? '+' : '+$extension'}';
     }
 
-    // Handle seventh chords and other extensions (B:7, B:9, etc.)
     if (quality.contains(RegExp(r'^\d'))) {
       return '$root$quality';
     }
 
-    // Default: just append quality
     return '$root$quality';
   }
 
   /// Create measures from downbeats and chords
-  /// CORRECTED: Better beat position calculation and chord assignment
   List<Measure> _createMeasuresFromDownbeats(
     List chords,
     List downbeats,
@@ -314,66 +397,135 @@ class ChordExtractionService {
     final beatsPerMeasure = _getBeatsPerMeasure(timeSignature);
     final measures = <Measure>[];
 
-    // Convert downbeats to doubles and sort
     final downbeatTimes = downbeats.map((db) => (db as num).toDouble()).toList()
       ..sort();
 
     print('Creating measures from ${downbeatTimes.length} downbeats...');
     print('Beats per measure: $beatsPerMeasure');
 
-    // Process each measure
+    int measureOrder = 0;
+
+    // FIXED: Always check if there are ANY chords (including 'N') before the first downbeat
+    if (downbeatTimes.isNotEmpty && downbeatTimes[0] > 0.0) {
+      // Check if any chord exists before first downbeat (including 'N' chord)
+      bool hasChordsBefore = chords.any(
+        (c) => (c['start'] as num).toDouble() < downbeatTimes[0],
+      );
+
+      if (hasChordsBefore) {
+        // Create measure from 0.0 to first downbeat
+        final measureStart = 0.0;
+        final measureEnd = downbeatTimes[0];
+        final measureDuration = measureEnd - measureStart;
+
+        print(
+          'Measure $measureOrder (intro): $measureStart - $measureEnd (duration: $measureDuration)',
+        );
+
+        final measureChords = List<String>.filled(beatsPerMeasure, '');
+        final beatDuration = measureDuration / beatsPerMeasure;
+
+        // Process ALL chords in this range, including 'N'
+        for (final chordData in chords) {
+          final chordName = chordData['chord'] as String;
+          final chordStart = (chordData['start'] as num).toDouble();
+          final chordEnd = (chordData['end'] as num).toDouble();
+
+          // Skip chords outside this measure
+          if (chordEnd <= measureStart || chordStart >= measureEnd) {
+            continue;
+          }
+
+          // Convert chord (N becomes %)
+          final displayChord = _convertChordFormat(chordName);
+
+          // Assign chord to beats it overlaps with
+          for (int beat = 0; beat < beatsPerMeasure; beat++) {
+            final beatStart = measureStart + beat * beatDuration;
+            final beatEnd = measureStart + (beat + 1) * beatDuration;
+
+            if (chordStart < beatEnd && chordEnd > beatStart) {
+              measureChords[beat] = displayChord;
+            }
+          }
+        }
+
+        // Apply filling logic (forward fill)
+        String lastNonEmptyChord = '';
+        for (int beat = 0; beat < beatsPerMeasure; beat++) {
+          if (measureChords[beat].isNotEmpty) {
+            lastNonEmptyChord = measureChords[beat];
+          } else if (lastNonEmptyChord.isNotEmpty) {
+            measureChords[beat] = lastNonEmptyChord;
+          }
+        }
+
+        // Replace consecutive same chords with '-'
+        String lastChord = '';
+        for (int beat = 0; beat < beatsPerMeasure; beat++) {
+          String chord = measureChords[beat];
+          if (chord.isNotEmpty && chord != '%' && chord == lastChord) {
+            measureChords[beat] = '-';
+          } else if (chord.isNotEmpty && chord != '%') {
+            lastChord = chord;
+          }
+        }
+
+        final measure = Measure.create(
+          sectionId: 0,
+          measureOrder: measureOrder,
+          timeSignature: timeSignature,
+        ).copyWith(chords: measureChords);
+
+        measures.add(measure);
+        print('  Created intro measure with chords: $measureChords');
+        measureOrder++;
+      }
+    }
+
+    // Process regular measures between downbeats
     for (int i = 0; i < downbeatTimes.length - 1; i++) {
       final measureStart = downbeatTimes[i];
       final measureEnd = downbeatTimes[i + 1];
       final measureDuration = measureEnd - measureStart;
 
       print(
-        'Measure $i: $measureStart - $measureEnd (duration: $measureDuration)',
+        'Measure $measureOrder: $measureStart - $measureEnd (duration: $measureDuration)',
       );
 
-      // Initialize measure with empty chords
       final measureChords = List<String>.filled(beatsPerMeasure, '');
       final beatDuration = measureDuration / beatsPerMeasure;
 
-      // Find all chords that overlap with this measure
       for (final chordData in chords) {
         final chordName = chordData['chord'] as String;
         final chordStart = (chordData['start'] as num).toDouble();
         final chordEnd = (chordData['end'] as num).toDouble();
 
-        // Skip 'N' (no chord)
-        if (chordName == 'N') continue;
-
-        // Check if chord overlaps with this measure
         if (chordEnd <= measureStart || chordStart >= measureEnd) {
-          continue; // No overlap
+          continue;
         }
 
-        // Convert API format to display format
         final displayChord = _convertChordFormat(chordName);
 
-        // Calculate which beats this chord should occupy
-        // Use center point of each beat for more accurate assignment
         for (int beat = 0; beat < beatsPerMeasure; beat++) {
-          final beatCenter = measureStart + (beat + 0.5) * beatDuration;
+          final beatStart = measureStart + beat * beatDuration;
+          final beatEnd = measureStart + (beat + 1) * beatDuration;
 
-          // Assign chord if beat center falls within chord duration
-          if (beatCenter >= chordStart && beatCenter < chordEnd) {
+          if (chordStart < beatEnd && chordEnd > beatStart) {
             measureChords[beat] = displayChord;
           }
         }
       }
 
-      // Handle empty beats by extending previous chord or using last non-empty
+      // Forward fill empty beats
       String lastNonEmptyChord = '';
       for (int beat = 0; beat < beatsPerMeasure; beat++) {
         if (measureChords[beat].isNotEmpty) {
           lastNonEmptyChord = measureChords[beat];
         } else if (lastNonEmptyChord.isNotEmpty) {
-          // Extend previous beat's chord
           measureChords[beat] = lastNonEmptyChord;
         } else if (measures.isNotEmpty) {
-          // Use last chord from previous measure
+          // If still empty, carry forward from previous measure
           final lastMeasure = measures.last;
           final lastChord = lastMeasure.chords.lastWhere(
             (c) => c.isNotEmpty,
@@ -386,18 +538,30 @@ class ChordExtractionService {
         }
       }
 
-      // Create measure
+      // Replace consecutive same chords with '-'
+      String lastChord = '';
+      for (int beat = 0; beat < beatsPerMeasure; beat++) {
+        String chord = measureChords[beat];
+        if (chord.isNotEmpty && chord != '%' && chord == lastChord) {
+          measureChords[beat] = '-';
+        } else if (chord.isNotEmpty && chord != '%') {
+          lastChord = chord;
+        }
+      }
+
       final measure = Measure.create(
         sectionId: 0,
-        measureOrder: i,
+        measureOrder: measureOrder,
         timeSignature: timeSignature,
       ).copyWith(chords: measureChords);
+
+      measureOrder++;
 
       measures.add(measure);
       print('  Created measure with chords: $measureChords');
     }
 
-    // Ensure we have at least 4 measures if needed
+    // Pad to minimum 4 measures if needed
     if (measures.length < 4) {
       print('Padding to minimum 4 measures (currently ${measures.length})');
 
@@ -427,7 +591,6 @@ class ChordExtractionService {
   String _detectKey(List chords) {
     if (chords.isEmpty) return 'C';
 
-    // Define major and minor scales (circle of fifths order)
     final majorKeys = [
       'C',
       'G',
@@ -457,7 +620,6 @@ class ChordExtractionService {
       'Dm',
     ];
 
-    // Diatonic chords for each key (I, ii, iii, IV, V, vi, vii°)
     final majorDiatonicChords = {
       'C': ['C:maj', 'D:min', 'E:min', 'F:maj', 'G:maj', 'A:min', 'B:dim'],
       'G': ['G:maj', 'A:min', 'B:min', 'C:maj', 'D:maj', 'E:min', 'F#:dim'],
@@ -536,21 +698,17 @@ class ChordExtractionService {
       'Dm': ['D:min', 'E:dim', 'F:maj', 'G:min', 'A:min', 'Bb:maj', 'C:maj'],
     };
 
-    // Extract and normalize chords
     final progressionChords = <String>[];
     for (final chordData in chords) {
       final chord = chordData['chord'] as String;
       if (chord == 'N') continue;
 
-      // Normalize chord format: "E:maj", "C#:min7" -> "E:maj", "C#:min"
-      // Remove extensions (7, 9, etc.) and keep only root:quality
       var normalized = chord;
       if (chord.contains(':')) {
         final parts = chord.split(':');
         final root = parts[0];
         var quality = parts[1];
 
-        // Strip extensions - keep only base quality (maj, min, dim, aug)
         if (quality.startsWith('min')) {
           quality = 'min';
         } else if (quality.startsWith('maj') ||
@@ -570,7 +728,6 @@ class ChordExtractionService {
 
     if (progressionChords.isEmpty) return 'C';
 
-    // Score each possible key
     final keyScores = <String, double>{};
 
     for (final key in majorKeys) {
@@ -582,18 +739,16 @@ class ChordExtractionService {
         final index = diatonic.indexOf(chord);
 
         if (index != -1) {
-          // Weight important chords more heavily
           if (index == 0) {
-            score += 3.0; // Tonic (I)
+            score += 3.0;
           } else if (index == 4) {
-            score += 2.5; // Dominant (V)
+            score += 2.5;
           } else if (index == 3) {
-            score += 2.0; // Subdominant (IV)
+            score += 2.0;
           } else {
             score += 1.0;
           }
 
-          // Bonus for first/last chord being tonic
           if ((i == 0 || i == progressionChords.length - 1) && index == 0) {
             score += 2.0;
           }
@@ -613,11 +768,11 @@ class ChordExtractionService {
 
         if (index != -1) {
           if (index == 0) {
-            score += 3.0; // Tonic (i)
+            score += 3.0;
           } else if (index == 4) {
-            score += 2.5; // Dominant (v)
+            score += 2.5;
           } else if (index == 3) {
-            score += 2.0; // Subdominant (iv)
+            score += 2.0;
           } else {
             score += 1.0;
           }
@@ -631,7 +786,6 @@ class ChordExtractionService {
       keyScores[key] = score;
     }
 
-    // Find the key with highest score
     var bestKey = 'C';
     var bestScore = 0.0;
 
@@ -646,7 +800,6 @@ class ChordExtractionService {
   }
 
   String _extractTitleFromFileName(String fileName) {
-    // Remove extension and clean up
     final nameWithoutExt = fileName.split('.').first;
     return nameWithoutExt.replaceAll('_', ' ').replaceAll('-', ' ').trim();
   }
