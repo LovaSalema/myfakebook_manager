@@ -10,7 +10,77 @@ class HtmlChordSheetService {
     return htmlContent;
   }
 
+  /// Get the number of beats per measure based on time signature
+  static int _getBeatsPerMeasure(String timeSignature) {
+    switch (timeSignature) {
+      case '4/4':
+        return 4;
+      case '3/4':
+        return 3;
+      case '2/4':
+        return 2;
+      case '6/8':
+        return 6;
+      case '12/8':
+        return 12;
+      case '5/4':
+        return 5;
+      case '7/8':
+        return 7;
+      default:
+        return 4; // Default to 4/4
+    }
+  }
+
+  /// Get grid layout based on time signature
+  static String _getGridLayout(String timeSignature) {
+    switch (timeSignature) {
+      case '4/4':
+        return '1fr 1fr / 1fr 1fr'; // 2x2 grid
+      case '3/4':
+        return '1fr 1fr 1fr / 1fr'; // 3x1 grid (3 horizontal)
+      case '2/4':
+        return '1fr 1fr / 1fr'; // 2x1 grid (2 horizontal)
+      case '6/8':
+        return '1fr 1fr 1fr / 1fr 1fr 1fr'; // 3x2 grid
+      case '12/8':
+        return '1fr 1fr 1fr 1fr / 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr'; // 4x3 grid
+      case '5/4':
+        return '1fr 1fr 1fr 1fr 1fr / 1fr'; // 5x1 grid
+      case '7/8':
+        return '1fr 1fr 1fr 1fr / 1fr 1fr 1fr'; // 4 + 3 layout
+      default:
+        return '1fr 1fr / 1fr 1fr'; // Default 2x2
+    }
+  }
+
+  /// Get time signature description
+  static String _getTimeSignatureDescription(String timeSignature) {
+    switch (timeSignature) {
+      case '4/4':
+        return 'Common time - Pop, rock, jazz, classique';
+      case '3/4':
+        return 'Valse, menuet';
+      case '2/4':
+        return 'Marche, polka';
+      case '6/8':
+        return 'Ternaire composé - Ballades, celtique';
+      case '12/8':
+        return 'Blues lent, swing, soul';
+      case '5/4':
+        return 'Rythme impair - Jazz progressif';
+      case '7/8':
+        return 'Rythme impair - Balkanique';
+      default:
+        return '';
+    }
+  }
+
   static String _buildHtmlTemplate(Song song, {bool forExport = false}) {
+    final timeSignature = song.timeSignature ?? '4/4';
+    final beatsPerMeasure = _getBeatsPerMeasure(timeSignature);
+    final gridLayout = _getGridLayout(timeSignature);
+
     return '''
 <!DOCTYPE html>
 <html lang="en">
@@ -76,8 +146,22 @@ class HtmlChordSheetService {
             margin-bottom: 5px;
         }
         
+        .time-signature {
+            font-weight: bold;
+            font-size: clamp(14px, 3vw, 18px);
+            margin-bottom: 3px;
+            color: #333;
+        }
+        
+        .time-sig-description {
+            font-size: clamp(9px, 1.8vw, 11px);
+            color: #777;
+            font-style: italic;
+        }
+        
         .key {
             font-size: clamp(10px, 2vw, 12px);
+            margin-top: 5px;
         }
         
         .section {
@@ -105,8 +189,7 @@ class HtmlChordSheetService {
         
         .chord-block {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
+            grid-template: $gridLayout;
             gap: 4px;
             align-items: center;
             justify-items: center;
@@ -116,6 +199,21 @@ class HtmlChordSheetService {
             font-size: clamp(11px, 2.2vw, 13px);
             font-weight: bold;
             font-family: 'Courier New', monospace;
+        }
+        
+        /* Specific layouts for different time signatures */
+        .chord-block[data-time-sig="3/4"],
+        .chord-block[data-time-sig="2/4"],
+        .chord-block[data-time-sig="5/4"] {
+            min-height: 40px;
+        }
+        
+        .chord-block[data-time-sig="6/8"] {
+            min-height: 70px;
+        }
+        
+        .chord-block[data-time-sig="12/8"] {
+            min-height: 90px;
         }
         
         .chord {
@@ -272,12 +370,14 @@ class HtmlChordSheetService {
                 ${song.structure?.description != null ? '<div class="meta">${song.structure!.description!}</div>' : ''}
             </div>
             <div class="header-right">
+                <div class="time-signature">$timeSignature</div>
+                <div class="time-sig-description">${_getTimeSignatureDescription(timeSignature)}</div>
                 ${song.tempo != null ? '<div class="tempo">♩=${song.tempo}</div>' : ''}
                 <div class="key">${song.artist}</div>
             </div>
         </div>
 
-        ${_buildSectionsHtml(song)}
+        ${_buildSectionsHtml(song, timeSignature, beatsPerMeasure)}
         
         <!-- Footer -->
         <div class="footer">
@@ -289,7 +389,11 @@ class HtmlChordSheetService {
 ''';
   }
 
-  static String _buildSectionsHtml(Song song) {
+  static String _buildSectionsHtml(
+    Song song,
+    String timeSignature,
+    int beatsPerMeasure,
+  ) {
     if (song.sections.isEmpty) {
       return '<div class="section"><div class="section-title">No Sections</div></div>';
     }
@@ -297,13 +401,19 @@ class HtmlChordSheetService {
     final sectionsHtml = StringBuffer();
 
     for (final section in song.sections) {
-      sectionsHtml.write(_buildSectionHtml(section));
+      sectionsHtml.write(
+        _buildSectionHtml(section, timeSignature, beatsPerMeasure),
+      );
     }
 
     return sectionsHtml.toString();
   }
 
-  static String _buildSectionHtml(Section section) {
+  static String _buildSectionHtml(
+    Section section,
+    String timeSignature,
+    int beatsPerMeasure,
+  ) {
     final sectionHtml = StringBuffer();
 
     sectionHtml.write('<div class="section">');
@@ -326,15 +436,17 @@ class HtmlChordSheetService {
           .where((chord) => chord.isNotEmpty)
           .toList();
 
-      // Build chord block in 2x2 grid
-      sectionHtml.write('<div class="chord-block">');
+      // Build chord block with time signature attribute
+      sectionHtml.write(
+        '<div class="chord-block" data-time-sig="$timeSignature">',
+      );
 
-      // Fill up to 4 positions (2x2 grid)
-      for (int i = 0; i < 4; i++) {
+      // Fill up to beatsPerMeasure positions
+      for (int i = 0; i < beatsPerMeasure; i++) {
         if (i < validChords.length) {
           sectionHtml.write('<div class="chord">${validChords[i]}</div>');
         } else {
-          // Empty cell if less than 4 chords
+          // Empty cell if less than beatsPerMeasure chords
           sectionHtml.write('<div class="chord"></div>');
         }
       }

@@ -28,7 +28,6 @@ class _AddSongScreenState extends State<AddSongScreen> {
   late final _titleController = TextEditingController();
   late final _artistController = TextEditingController();
   double _tempoValue = 120.0;
-  late final _timeSignatureController = TextEditingController(text: '4/4');
 
   // Musical keys for dropdown
   final List<String> _musicalKeys = [
@@ -46,6 +45,18 @@ class _AddSongScreenState extends State<AddSongScreen> {
     'B',
   ];
   String _selectedKey = 'C';
+
+  // Time signatures for dropdown
+  final List<String> _timeSignatures = [
+    '4/4',
+    '3/4',
+    '2/4',
+    '6/8',
+    '12/8',
+    '5/4',
+    '7/8',
+  ];
+  String _selectedTimeSignature = '4/4';
 
   bool _isSaving = false;
   String _selectedNotationType = 'ROMAN_NUMERALS';
@@ -78,7 +89,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       _artistController.text = song.artist;
       _selectedKey = song.key;
       _tempoValue = song.tempo?.toDouble() ?? 120.0;
-      _timeSignatureController.text = song.timeSignature;
+      _selectedTimeSignature = song.timeSignature;
       _selectedNotationType = song.notationType;
 
       // Load song structure sections and measures if they exist
@@ -102,7 +113,6 @@ class _AddSongScreenState extends State<AddSongScreen> {
   void dispose() {
     _titleController.dispose();
     _artistController.dispose();
-    _timeSignatureController.dispose();
 
     // Dispose all measure controllers
     for (final controller in _measureControllers.values) {
@@ -222,7 +232,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
             id: null, // Will be set by database
             sectionId: 0, // Will be set after section creation
             measureOrder: measureIndex,
-            timeSignature: _timeSignatureController.text.trim(),
+            timeSignature: _selectedTimeSignature,
             chords: chords,
             specialSymbol: null,
             hasFirstEnding: false,
@@ -257,7 +267,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
       key: _selectedKey,
-      timeSignature: _timeSignatureController.text.trim(),
+      timeSignature: _selectedTimeSignature,
       tempo: _tempoValue.toInt(),
       style: null,
       notationType: _selectedNotationType,
@@ -306,7 +316,7 @@ class _AddSongScreenState extends State<AddSongScreen> {
       title: _titleController.text.trim(),
       artist: _artistController.text.trim(),
       key: _selectedKey,
-      timeSignature: _timeSignatureController.text.trim(),
+      timeSignature: _selectedTimeSignature,
       tempo: _tempoValue.toInt(),
       style: null,
       notationType: _selectedNotationType,
@@ -653,16 +663,34 @@ class _AddSongScreenState extends State<AddSongScreen> {
                 ),
               ),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _timeSignatureController,
+              DropdownButtonFormField<String>(
+                value: _selectedTimeSignature,
                 decoration: const InputDecoration(
-                  hintText: '4/4',
                   border: OutlineInputBorder(),
                   contentPadding: EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
                 ),
+                items: _timeSignatures.map((String timeSig) {
+                  return DropdownMenuItem<String>(
+                    value: timeSig,
+                    child: Text(timeSig),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _selectedTimeSignature = newValue;
+                    });
+                  }
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez sélectionner une signature rythmique';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 

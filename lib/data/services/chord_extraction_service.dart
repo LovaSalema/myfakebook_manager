@@ -53,7 +53,7 @@ class ChordExtractionService {
       beatRequest.files.add(
         await http.MultipartFile.fromPath('file', audioFile.path),
       );
-      beatRequest.fields['detector'] = 'abeat-transformer';
+      beatRequest.fields['detector'] = 'beat-transformer';
 
       print('Sending beat detection request...');
       final beatResponse = await beatRequest.send();
@@ -185,24 +185,9 @@ class ChordExtractionService {
   }
 
   /// Parse and validate time signature from API
-  /// Uses beats and downbeats to calculate the actual time signature
+  /// Use the time signature directly from API as the data is correct
   String _parseTimeSignature(dynamic timeSig, List? beats, List? downbeats) {
-    // First, try to calculate from beats and downbeats if available
-    if (beats != null &&
-        downbeats != null &&
-        beats.isNotEmpty &&
-        downbeats.isNotEmpty) {
-      final calculatedTimeSig = _calculateTimeSignatureFromBeats(
-        beats,
-        downbeats,
-      );
-      if (calculatedTimeSig != null) {
-        print('Calculated time signature from beats: $calculatedTimeSig');
-        return calculatedTimeSig;
-      }
-    }
-
-    // Fallback to parsing the provided time signature
+    // Use the time signature directly from API
     if (timeSig == null) {
       print('No time signature provided, defaulting to 4/4');
       return '4/4';
@@ -233,9 +218,8 @@ class ChordExtractionService {
     // Parse and validate values
     final parts = timeSignature.split('/');
     final numerator = int.tryParse(parts[0]);
-    final denominator = int.tryParse(parts[1]);
 
-    if (numerator == null || denominator == null) {
+    if (numerator == null || parts.length != 2) {
       print(
         'Could not parse time signature: $timeSignature, defaulting to 4/4',
       );
@@ -248,156 +232,9 @@ class ChordExtractionService {
       return '4/4';
     }
 
-    // Validate denominator (must be power of 2: 1, 2, 4, 8, 16, 32)
-    final validDenominators = [1, 2, 4, 8, 16, 32];
-    if (!validDenominators.contains(denominator)) {
-      print('Invalid denominator: $denominator, defaulting to 4/4');
-      return '4/4';
-    }
-
-    print('Validated time signature: $timeSignature');
+    // Trust the API's time signature as it's correct
+    print('Using time signature from API: $timeSignature');
     return timeSignature;
-  }
-
-  /// Calculate time signature by analyzing the relationship between beats and downbeats
-  /// CORRECTED: More robust detection for 2/4, 3/4, 4/4, 6/8, 5/4, 7/8
-  /// Calculate time signature by analyzing the relationship between beats and downbeats
-  /// CORRECTED: Uses autocorrelation on downbeat intervals + beat density for robust detection
-  /// Supports: 2/4, 3/4, 4/4, 5/4, 6/8, 7/8, 9/8, 12/8
-  String? _calculateTimeSignatureFromBeats(List beats, List downbeats) {
-    try {
-      if (beats.length < 8 || downbeats.length < 3) {
-        print(
-          'Insufficient data: ${beats.length} beats, ${downbeats.length} downbeats',
-        );
-        return null;
-      }
-
-      final beatTimes = beats.map((b) => (b as num).toDouble()).toList()
-        ..sort();
-      final downbeatTimes =
-          downbeats.map((db) => (db as num).toDouble()).toList()..sort();
-
-      // Calculate average beat interval
-      final beatIntervals = <double>[];
-      for (int i = 1; i < beatTimes.length; i++) {
-        beatIntervals.add(beatTimes[i] - beatTimes[i - 1]);
-      }
-      final avgBeatInterval =
-          beatIntervals.reduce((a, b) => a + b) / beatIntervals.length;
-
-      // Extract downbeat intervals
-      final downbeatIntervals = <double>[];
-      for (int i = 1; i < downbeatTimes.length; i++) {
-        downbeatIntervals.add(downbeatTimes[i] - downbeatTimes[i - 1]);
-      }
-
-      if (downbeatIntervals.length < 2) return null;
-
-      // Normalize intervals by average beat
-      final normalizedIntervals = downbeatIntervals
-          .map((d) => d / avgBeatInterval)
-          .toList();
-
-      // Round to nearest 0.1 to handle floating point noise
-      final rounded = normalizedIntervals
-          .map((x) => (x * 10).round() / 10)
-          .toList();
-
-      print('Normalized downbeat intervals: $rounded');
-
-      // Use autocorrelation to find periodicity in downbeat intervals
-      final maxLag = rounded.length ~/ 2;
-      final autocorr = <double>[];
-      for (int lag = 1; lag <= maxLag && lag < 6; lag++) {
-        double sum = 0.0;
-        int count = 0;
-        for (int i = 0; i < rounded.length - lag; i++) {
-          sum += rounded[i] * rounded[i + lag];
-          count++;
-        }
-        autocorr.add(count > 0 ? sum / count : 0.0);
-      }
-
-      // Find most periodic interval (in beats)
-      int bestLag = 1;
-      double bestCorr = -1.0;
-      for (int i = 0; i < autocorr.length; i++) {
-        if (autocorr[i] > bestCorr) {
-          bestCorr = autocorr[i];
-          bestLag = i + 1;
-        }
-      }
-
-      // Estimate beats per measure from dominant interval
-      final estimatedBeats = <int>[];
-      for (final interval in rounded) {
-        final beats = (interval + 0.1).round(); // tolerance
-        if (beats >= 2 && beats <= 12) {
-          estimatedBeats.add(beats);
-        }
-      }
-
-      if (estimatedBeats.isEmpty) return null;
-
-      // Count frequency
-      final freq = <int, int>{};
-      for (final b in estimatedBeats) {
-        freq[b] = (freq[b] ?? 0) + 1;
-      }
-
-      int mostCommon = freq.entries
-          .reduce((a, b) => a.value > b.value ? a : b)
-          .key;
-      final confidence = freq[mostCommon]! / estimatedBeats.length;
-
-      print(
-        'Autocorrelation lag: $bestLag, Most common: $mostCommon (conf: ${confidence.toStringAsFixed(2)})',
-      );
-
-      // Refine using confidence
-      if (confidence < 0.6) {
-        // Use autocorrelation-based estimate
-        mostCommon = (rounded.reduce((a, b) => a + b) / rounded.length).round();
-      }
-
-      return _mapToSupportedTimeSignature(mostCommon);
-    } catch (e) {
-      print('Error in time signature calculation: $e');
-      return null;
-    }
-  }
-
-  /// Map beat count to standard time signature with compound meter detection
-  /// CORRECTED: Uses beat subdivision and tempo-aware logic
-  String _mapToSupportedTimeSignature(int beatCount) {
-    // Simple meters
-    if ([2, 3, 4, 5].contains(beatCount)) {
-      return '$beatCount/4';
-    }
-
-    // Compound duple/triple (6/8, 9/8, 12/8)
-    if (beatCount % 3 == 0 && beatCount >= 6 && beatCount <= 12) {
-      return '$beatCount/8';
-    }
-
-    // Complex meters
-    if (beatCount == 7) return '7/8';
-    if (beatCount == 10) return '5/4'; // 5+5
-    if (beatCount == 11) return '11/8';
-
-    // Edge cases
-    if (beatCount == 1) return '4/4';
-    if (beatCount == 8) return '4/4'; // likely doubled
-    if (beatCount > 12) {
-      final reduced = (beatCount / 2).round();
-      if (reduced >= 3 && reduced <= 6) {
-        return '$reduced/4';
-      }
-    }
-
-    // Default
-    return '4/4';
   }
 
   /// Map beat count to one of the supported time signatures
