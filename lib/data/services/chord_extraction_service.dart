@@ -88,10 +88,6 @@ class ChordExtractionService {
   }
 
   /// NEW: Organize chord data into a grid structure for easy UI display
-  /// Returns a 2D grid where:
-  /// - Each row represents a line in the UI (typically 4 measures)
-  /// - Each column represents a beat position
-  /// - Grid structure: List<List<ChordCell>>
   Map<String, dynamic> organizeIntoGrid(
     Map<String, dynamic> apiData,
     String fileName, {
@@ -266,7 +262,7 @@ class ChordExtractionService {
 
       // Create section with populated measures
       final sectionWithChords = Section(
-        songId: 0, // Will be set when saved
+        songId: 0,
         sectionType: 'VERSE',
         sectionLabel: 'A',
         sectionOrder: 0,
@@ -338,11 +334,11 @@ class ChordExtractionService {
     return timeSignature;
   }
 
-  /// Get beats per measure from time signature
+  /// Get beats per measure from time signature (toujours le numérateur)
   int _getBeatsPerMeasure(String timeSignature) {
     final parts = timeSignature.split('/');
     final numerator = int.parse(parts[0]);
-    return numerator;
+    return numerator; // 6/8 = 6 beats, 4/4 = 4 beats
   }
 
   /// Convert chord from API format to display format
@@ -389,6 +385,7 @@ class ChordExtractionService {
   }
 
   /// Create measures from downbeats and chords
+  /// CORRECTION: Synchronise les chords avec les beats de chaque mesure
   List<Measure> _createMeasuresFromDownbeats(
     List chords,
     List downbeats,
@@ -401,84 +398,34 @@ class ChordExtractionService {
       ..sort();
 
     print('Creating measures from ${downbeatTimes.length} downbeats...');
+    print('Time signature: $timeSignature');
     print('Beats per measure: $beatsPerMeasure');
 
     int measureOrder = 0;
 
-    // FIXED: Always check if there are ANY chords (including 'N') before the first downbeat
-    if (downbeatTimes.isNotEmpty && downbeatTimes[0] > 0.0) {
-      // Check if any chord exists before first downbeat (including 'N' chord)
+    // Handle intro measure if exists (before first downbeat)
+    if (downbeatTimes.isNotEmpty && downbeatTimes[0] > 0.1) {
       bool hasChordsBefore = chords.any(
         (c) => (c['start'] as num).toDouble() < downbeatTimes[0],
       );
 
       if (hasChordsBefore) {
-        // Create measure from 0.0 to first downbeat
         final measureStart = 0.0;
         final measureEnd = downbeatTimes[0];
-        final measureDuration = measureEnd - measureStart;
 
-        print(
-          'Measure $measureOrder (intro): $measureStart - $measureEnd (duration: $measureDuration)',
+        final measure = _createMeasureWithBeatSync(
+          chords,
+          measureStart,
+          measureEnd,
+          beatsPerMeasure,
+          timeSignature,
+          measureOrder,
+          null,
         );
 
-        final measureChords = List<String>.filled(beatsPerMeasure, '');
-        final beatDuration = measureDuration / beatsPerMeasure;
-
-        // Process ALL chords in this range, including 'N'
-        for (final chordData in chords) {
-          final chordName = chordData['chord'] as String;
-          final chordStart = (chordData['start'] as num).toDouble();
-          final chordEnd = (chordData['end'] as num).toDouble();
-
-          // Skip chords outside this measure
-          if (chordEnd <= measureStart || chordStart >= measureEnd) {
-            continue;
-          }
-
-          // Convert chord (N becomes %)
-          final displayChord = _convertChordFormat(chordName);
-
-          // Assign chord to beats it overlaps with
-          for (int beat = 0; beat < beatsPerMeasure; beat++) {
-            final beatStart = measureStart + beat * beatDuration;
-            final beatEnd = measureStart + (beat + 1) * beatDuration;
-
-            if (chordStart < beatEnd && chordEnd > beatStart) {
-              measureChords[beat] = displayChord;
-            }
-          }
-        }
-
-        // Apply filling logic (forward fill)
-        String lastNonEmptyChord = '';
-        for (int beat = 0; beat < beatsPerMeasure; beat++) {
-          if (measureChords[beat].isNotEmpty) {
-            lastNonEmptyChord = measureChords[beat];
-          } else if (lastNonEmptyChord.isNotEmpty) {
-            measureChords[beat] = lastNonEmptyChord;
-          }
-        }
-
-        // Replace consecutive same chords with '-'
-        String lastChord = '';
-        for (int beat = 0; beat < beatsPerMeasure; beat++) {
-          String chord = measureChords[beat];
-          if (chord.isNotEmpty && chord != '%' && chord == lastChord) {
-            measureChords[beat] = '-';
-          } else if (chord.isNotEmpty && chord != '%') {
-            lastChord = chord;
-          }
-        }
-
-        final measure = Measure.create(
-          sectionId: 0,
-          measureOrder: measureOrder,
-          timeSignature: timeSignature,
-        ).copyWith(chords: measureChords);
-
         measures.add(measure);
-        print('  Created intro measure with chords: $measureChords');
+        print('Measure $measureOrder (intro): $measureStart - $measureEnd');
+        print('  Chords: ${measure.chords}');
         measureOrder++;
       }
     }
@@ -487,78 +434,58 @@ class ChordExtractionService {
     for (int i = 0; i < downbeatTimes.length - 1; i++) {
       final measureStart = downbeatTimes[i];
       final measureEnd = downbeatTimes[i + 1];
-      final measureDuration = measureEnd - measureStart;
 
-      print(
-        'Measure $measureOrder: $measureStart - $measureEnd (duration: $measureDuration)',
+      final previousMeasure = measures.isNotEmpty ? measures.last : null;
+
+      final measure = _createMeasureWithBeatSync(
+        chords,
+        measureStart,
+        measureEnd,
+        beatsPerMeasure,
+        timeSignature,
+        measureOrder,
+        previousMeasure,
       );
 
-      final measureChords = List<String>.filled(beatsPerMeasure, '');
-      final beatDuration = measureDuration / beatsPerMeasure;
-
-      for (final chordData in chords) {
-        final chordName = chordData['chord'] as String;
-        final chordStart = (chordData['start'] as num).toDouble();
-        final chordEnd = (chordData['end'] as num).toDouble();
-
-        if (chordEnd <= measureStart || chordStart >= measureEnd) {
-          continue;
-        }
-
-        final displayChord = _convertChordFormat(chordName);
-
-        for (int beat = 0; beat < beatsPerMeasure; beat++) {
-          final beatStart = measureStart + beat * beatDuration;
-          final beatEnd = measureStart + (beat + 1) * beatDuration;
-
-          if (chordStart < beatEnd && chordEnd > beatStart) {
-            measureChords[beat] = displayChord;
-          }
-        }
-      }
-
-      // Forward fill empty beats
-      String lastNonEmptyChord = '';
-      for (int beat = 0; beat < beatsPerMeasure; beat++) {
-        if (measureChords[beat].isNotEmpty) {
-          lastNonEmptyChord = measureChords[beat];
-        } else if (lastNonEmptyChord.isNotEmpty) {
-          measureChords[beat] = lastNonEmptyChord;
-        } else if (measures.isNotEmpty) {
-          // If still empty, carry forward from previous measure
-          final lastMeasure = measures.last;
-          final lastChord = lastMeasure.chords.lastWhere(
-            (c) => c.isNotEmpty,
-            orElse: () => '',
-          );
-          if (lastChord.isNotEmpty) {
-            measureChords[beat] = lastChord;
-            lastNonEmptyChord = lastChord;
-          }
-        }
-      }
-
-      // Replace consecutive same chords with '-'
-      String lastChord = '';
-      for (int beat = 0; beat < beatsPerMeasure; beat++) {
-        String chord = measureChords[beat];
-        if (chord.isNotEmpty && chord != '%' && chord == lastChord) {
-          measureChords[beat] = '-';
-        } else if (chord.isNotEmpty && chord != '%') {
-          lastChord = chord;
-        }
-      }
-
-      final measure = Measure.create(
-        sectionId: 0,
-        measureOrder: measureOrder,
-        timeSignature: timeSignature,
-      ).copyWith(chords: measureChords);
-
-      measureOrder++;
-
       measures.add(measure);
-      print('  Created measure with chords: $measureChords');
+      print('Measure $measureOrder: $measureStart - $measureEnd');
+      print('  Chords: ${measure.chords}');
+      measureOrder++;
+    }
+
+    // Handle last measure if there are chords after last downbeat
+    if (downbeatTimes.isNotEmpty) {
+      final lastDownbeat = downbeatTimes.last;
+      final hasChordsAfter = chords.any(
+        (c) => (c['start'] as num).toDouble() >= lastDownbeat,
+      );
+
+      if (hasChordsAfter) {
+        final avgDuration = downbeatTimes.length > 1
+            ? (downbeatTimes.last - downbeatTimes.first) /
+                  (downbeatTimes.length - 1)
+            : 2.0;
+
+        final measureStart = lastDownbeat;
+        final measureEnd = lastDownbeat + avgDuration;
+
+        final previousMeasure = measures.isNotEmpty ? measures.last : null;
+
+        final measure = _createMeasureWithBeatSync(
+          chords,
+          measureStart,
+          measureEnd,
+          beatsPerMeasure,
+          timeSignature,
+          measureOrder,
+          previousMeasure,
+        );
+
+        measures.add(measure);
+        print('Measure $measureOrder (last): $measureStart - $measureEnd');
+        print('  Chords: ${measure.chords}');
+        measureOrder++;
+      }
     }
 
     // Pad to minimum 4 measures if needed
@@ -567,7 +494,7 @@ class ChordExtractionService {
 
       final lastChord = measures.isNotEmpty && measures.last.chords.isNotEmpty
           ? measures.last.chords.firstWhere(
-              (c) => c.isNotEmpty,
+              (c) => c.isNotEmpty && c != '-',
               orElse: () => '',
             )
           : '';
@@ -585,6 +512,110 @@ class ChordExtractionService {
 
     print('Final measure count: ${measures.length}');
     return measures;
+  }
+
+  /// CORRECTION PRINCIPALE: Créer une mesure avec synchronisation précise des accords
+  /// Cette méthode divise chaque mesure en beats et assigne le bon accord à chaque beat
+  Measure _createMeasureWithBeatSync(
+    List chords,
+    double measureStart,
+    double measureEnd,
+    int beatsPerMeasure,
+    String timeSignature,
+    int measureOrder,
+    Measure? previousMeasure,
+  ) {
+    final measureDuration = measureEnd - measureStart;
+    final beatDuration = measureDuration / beatsPerMeasure;
+
+    // Initialiser le tableau de chords pour cette mesure
+    final measureChords = List<String>.filled(beatsPerMeasure, '');
+
+    print(
+      '  Creating measure $measureOrder: start=$measureStart, end=$measureEnd, duration=$measureDuration',
+    );
+    print(
+      '  Beat duration: $beatDuration, beats per measure: $beatsPerMeasure',
+    );
+
+    // Pour chaque beat dans la mesure, trouver le chord actif à ce moment
+    for (int beatIdx = 0; beatIdx < beatsPerMeasure; beatIdx++) {
+      // Le temps du milieu de ce beat (pour une meilleure précision)
+      final beatTime =
+          measureStart + (beatIdx * beatDuration) + (beatDuration / 2);
+
+      // Trouver le chord actif au moment de ce beat
+      String? activeChord;
+
+      for (final chordData in chords) {
+        final chordStart = (chordData['start'] as num).toDouble();
+        final chordEnd = (chordData['end'] as num).toDouble();
+
+        // Si ce chord est actif au moment du beat (avec une tolérance)
+        if (chordStart <= beatTime && beatTime < chordEnd) {
+          activeChord = _convertChordFormat(chordData['chord'] as String);
+          print(
+            '    Beat $beatIdx (time=$beatTime): found chord $activeChord (active from $chordStart to $chordEnd)',
+          );
+          break;
+        }
+      }
+
+      if (activeChord != null) {
+        measureChords[beatIdx] = activeChord;
+      } else {
+        print('    Beat $beatIdx (time=$beatTime): no chord found');
+      }
+    }
+
+    // Forward fill: si un beat n'a pas de chord, utiliser le précédent
+    String lastChord = '';
+
+    // Essayer de commencer avec le dernier chord de la mesure précédente
+    if (previousMeasure != null && measureChords[0].isEmpty) {
+      final prevChords = previousMeasure.chords;
+      for (int i = prevChords.length - 1; i >= 0; i--) {
+        if (prevChords[i].isNotEmpty &&
+            prevChords[i] != '-' &&
+            prevChords[i] != '%') {
+          lastChord = prevChords[i];
+          print('  Using last chord from previous measure: $lastChord');
+          break;
+        }
+      }
+    }
+
+    // Forward fill les beats vides
+    for (int beatIdx = 0; beatIdx < beatsPerMeasure; beatIdx++) {
+      if (measureChords[beatIdx].isNotEmpty &&
+          measureChords[beatIdx] != '%' &&
+          measureChords[beatIdx] != '-') {
+        lastChord = measureChords[beatIdx];
+      } else if (measureChords[beatIdx].isEmpty && lastChord.isNotEmpty) {
+        measureChords[beatIdx] = lastChord;
+        print('  Beat $beatIdx: forward filled with $lastChord');
+      }
+    }
+
+    // Remplacer les accords consécutifs identiques par '-'
+    String previousChord = '';
+    for (int beatIdx = 0; beatIdx < beatsPerMeasure; beatIdx++) {
+      final chord = measureChords[beatIdx];
+
+      if (chord.isNotEmpty && chord != '%' && chord == previousChord) {
+        measureChords[beatIdx] = '-';
+      } else if (chord.isNotEmpty && chord != '%' && chord != '-') {
+        previousChord = chord;
+      }
+    }
+
+    print('  Final measure chords: $measureChords');
+
+    return Measure.create(
+      sectionId: 0,
+      measureOrder: measureOrder,
+      timeSignature: timeSignature,
+    ).copyWith(chords: measureChords);
   }
 
   /// Detect key from chord progression
