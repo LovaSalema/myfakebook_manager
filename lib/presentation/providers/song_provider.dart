@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/services/database_helper.dart';
+import '../../data/services/extraction_database_helper.dart';
 import '../../data/models/song.dart';
 import '../../core/utils/validators.dart';
 
@@ -23,6 +24,7 @@ class SongProvider with ChangeNotifier {
   String? _searchQuery;
   String? _keyFilter;
   bool _favoritesOnly = false;
+  bool _includeExtractedSongs = false;
   Timer? _searchDebounceTimer;
 
   // Getters
@@ -33,6 +35,7 @@ class SongProvider with ChangeNotifier {
   String? get searchQuery => _searchQuery;
   String? get keyFilter => _keyFilter;
   bool get favoritesOnly => _favoritesOnly;
+  bool get includeExtractedSongs => _includeExtractedSongs;
 
   // Computed getters
   List<Song> get favoriteSongs =>
@@ -47,6 +50,41 @@ class SongProvider with ChangeNotifier {
 
     try {
       _songs = await _databaseHelper.getAllSongs();
+      _setLoading(false);
+    } catch (e) {
+      _setError('Failed to load songs: $e');
+    }
+  }
+
+  /// Load all songs including extracted songs for repertoire selection
+  Future<void> loadAllSongsForRepertoire() async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      // Clean up any duplicate songs first
+      final cleanedCount = await _databaseHelper.cleanupDuplicateSongs();
+      if (cleanedCount > 0) {
+        print('DEBUG: Cleaned up $cleanedCount duplicate songs');
+      }
+
+      // Load regular songs
+      final regularSongs = await _databaseHelper.getAllSongs();
+
+      // Load extracted songs
+      final extractionHelper = ExtractionDatabaseHelper();
+      final extractedSongs = await extractionHelper.getAllSongs();
+
+      // Mark extracted songs and combine lists
+      final markedExtractedSongs = extractedSongs.map((song) {
+        // Create a special ID for extracted songs (negative to avoid conflicts)
+        return song.copyWith(
+          id: -(song.id! + 1000000),
+        ); // Offset to avoid conflicts
+      }).toList();
+
+      _songs = [...regularSongs, ...markedExtractedSongs];
+      _includeExtractedSongs = true;
       _setLoading(false);
     } catch (e) {
       _setError('Failed to load songs: $e');

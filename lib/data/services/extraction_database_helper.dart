@@ -657,6 +657,18 @@ class ExtractionDatabaseHelper implements BaseDatabaseHelper {
     }
   }
 
+  /// Check if a song with the same title and artist already exists (not applicable for extraction DB)
+  Future<Song?> findSongByTitleAndArtist(String title, String artist) async {
+    // Extraction database doesn't need duplicate checking
+    return null;
+  }
+
+  /// Clean up duplicate songs (not applicable for extraction DB - always returns 0)
+  Future<int> cleanupDuplicateSongs() async {
+    // Extraction database doesn't need cleanup
+    return 0;
+  }
+
   // ===========================================================================
   // HELPER METHODS
   // ===========================================================================

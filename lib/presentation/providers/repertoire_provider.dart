@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/services/database_helper.dart';
+import '../../data/services/extraction_database_helper.dart';
 import '../../data/models/repertoire.dart';
 import '../../data/models/song.dart';
-import '../../core/utils/validators.dart';
 
 /// Modern RepertoireProvider with advanced state management features
 class RepertoireProvider with ChangeNotifier {
@@ -139,13 +139,21 @@ class RepertoireProvider with ChangeNotifier {
       _repertoireSongs = await _databaseHelper.getSongsInRepertoire(
         repertoireId,
       );
+      print(
+        'DEBUG: loadSongsInRepertoire loaded ${_repertoireSongs.length} songs for repertoire $repertoireId',
+      );
+      _repertoireSongs.forEach((song) {
+        print(
+          'DEBUG: Song in repertoire: ${song.title} by ${song.artist} (ID: ${song.id})',
+        );
+      });
       _setLoading(false);
     } catch (e) {
       _setError('Failed to load repertoire songs: $e');
     }
   }
 
-  /// Add multiple songs to repertoire
+  /// Add multiple songs to repertoire (supports both regular and extracted songs)
   Future<bool> addSongsToRepertoire(int repertoireId, List<int> songIds) async {
     _clearError();
 
@@ -155,7 +163,98 @@ class RepertoireProvider with ChangeNotifier {
     }
 
     try {
-      await _databaseHelper.addSongsToRepertoire(repertoireId, songIds);
+      // Separate regular and extracted song IDs
+      final regularSongIds = <int>[];
+      final extractedSongIds = <int>[];
+
+      for (final songId in songIds) {
+        if (songId < 0) {
+          // Extracted song (negative ID)
+          extractedSongIds.add(-(songId + 1000000)); // Convert back to positive
+        } else {
+          // Regular song
+          regularSongIds.add(songId);
+        }
+      }
+
+      // Add regular songs
+      if (regularSongIds.isNotEmpty) {
+        await _databaseHelper.addSongsToRepertoire(
+          repertoireId,
+          regularSongIds,
+        );
+      }
+
+      // Add extracted songs (copy them to main database first if not already present)
+      if (extractedSongIds.isNotEmpty) {
+        final extractionHelper = ExtractionDatabaseHelper();
+
+        for (final extractedSongId in extractedSongIds) {
+          print('DEBUG: Processing extracted song ID: $extractedSongId');
+          // Get the extracted song
+          final extractedSong = await extractionHelper.getSongById(
+            extractedSongId,
+          );
+          print(
+            'DEBUG: Retrieved extracted song: ${extractedSong?.title} by ${extractedSong?.artist}',
+          );
+          if (extractedSong != null) {
+            // Validate the song before copying
+            if (!extractedSong.validate()) {
+              print('DEBUG: Extracted song validation failed');
+              print(
+                'DEBUG: Title: "${extractedSong.title}", Artist: "${extractedSong.artist}", Key: "${extractedSong.key}", TimeSig: "${extractedSong.timeSignature}", Notation: "${extractedSong.notationType}"',
+              );
+              continue;
+            }
+
+            // Check if a song with the same title and artist already exists in main database
+            final existingSong = await _databaseHelper.findSongByTitleAndArtist(
+              extractedSong.title,
+              extractedSong.artist,
+            );
+
+            int songIdToUse;
+            if (existingSong != null) {
+              print(
+                'DEBUG: Song already exists in main database with ID: ${existingSong.id}',
+              );
+              songIdToUse = existingSong.id!;
+            } else {
+              // Copy to main database using database helper directly
+              print(
+                'DEBUG: Attempting to insert song directly to main database...',
+              );
+              try {
+                final newSongId = await _databaseHelper.insertSong(
+                  extractedSong,
+                );
+                print('DEBUG: Insert result - new song ID: $newSongId');
+
+                if (newSongId > 0) {
+                  songIdToUse = newSongId;
+                } else {
+                  print(
+                    'DEBUG: Failed to insert song - returned ID: $newSongId',
+                  );
+                  continue;
+                }
+              } catch (e) {
+                print('DEBUG: Exception during song insertion: $e');
+                continue;
+              }
+            }
+
+            // Add the song (existing or newly copied) to repertoire
+            await _databaseHelper.addSongsToRepertoire(repertoireId, [
+              songIdToUse,
+            ]);
+            print('DEBUG: Successfully added song to repertoire');
+          } else {
+            print('DEBUG: Could not retrieve extracted song');
+          }
+        }
+      }
 
       // Reload repertoire songs if this is the selected repertoire
       if (_selectedRepertoire?.id == repertoireId) {

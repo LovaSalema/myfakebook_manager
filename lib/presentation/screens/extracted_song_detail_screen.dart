@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import '../../data/models/song.dart';
+import '../../data/models/repertoire.dart';
 import '../providers/extraction_song_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/repertoire_provider.dart';
@@ -11,6 +12,7 @@ import '../../core/theme/app_text_styles.dart';
 import '../../data/services/image_export_service.dart';
 import '../../core/services/metronome_service.dart';
 import '../widgets/chord_grid/chord_sheet_webview.dart';
+import '../providers/song_provider.dart';
 
 /// Professional Extracted Song Detail Screen with pixel-perfect chord grid template
 class ExtractedSongDetailScreen extends StatefulWidget {
@@ -448,28 +450,50 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
           ),
         ),
       ),
-      child: Row(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: Icon(Icons.download, size: 20, color: primaryColor),
-              label: Text('Export', style: TextStyle(color: primaryColor)),
-              onPressed: _showExportBottomSheet,
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: primaryColor),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.download, size: 20, color: primaryColor),
+                  label: Text('Export', style: TextStyle(color: primaryColor)),
+                  onPressed: _showExportBottomSheet,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: primaryColor),
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton.icon(
+                  icon: Icon(Icons.share, size: 20, color: primaryColor),
+                  label: Text(
+                    'Partager',
+                    style: TextStyle(color: primaryColor),
+                  ),
+                  onPressed: _captureAndShareImage,
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: BorderSide(color: primaryColor),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: OutlinedButton.icon(
-              icon: Icon(Icons.share, size: 20, color: primaryColor),
-              label: Text('Partager', style: TextStyle(color: primaryColor)),
-              onPressed: _captureAndShareImage,
-              style: OutlinedButton.styleFrom(
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              icon: const Icon(Icons.playlist_add, size: 20),
+              label: const Text('Ajouter au répertoire'),
+              onPressed: _addToRepertoire,
+              style: FilledButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Theme.of(context).colorScheme.onPrimary,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                side: BorderSide(color: primaryColor),
               ),
             ),
           ),
@@ -802,6 +826,96 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
     }
   }
 
+  /// Add extracted song to repertoire
+  Future<void> _addToRepertoire() async {
+    try {
+      final repertoireProvider = Provider.of<RepertoireProvider>(
+        context,
+        listen: false,
+      );
+
+      // Load repertoires if not already loaded
+      if (repertoireProvider.repertoires.isEmpty) {
+        await repertoireProvider.loadRepertoires();
+      }
+
+      if (repertoireProvider.repertoires.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Aucun répertoire disponible. Créez-en un d\'abord.'),
+          ),
+        );
+        return;
+      }
+
+      // Show repertoire selection dialog
+      final selectedRepertoireId = await showDialog<int>(
+        context: context,
+        builder: (context) => _RepertoireSelectionDialog(
+          repertoires: repertoireProvider.repertoires,
+        ),
+      );
+
+      if (selectedRepertoireId == null) return;
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Copy song to main database
+      final songProvider = Provider.of<SongProvider>(context, listen: false);
+      final success = await songProvider.addSong(_song);
+
+      if (!success) {
+        Navigator.of(context).pop(); // Close loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de la copie de la chanson'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Get the newly added song ID
+      final copiedSong = songProvider.songs.lastWhere(
+        (song) => song.title == _song.title && song.artist == _song.artist,
+      );
+
+      // Add to repertoire
+      final repertoireSuccess = await repertoireProvider.addSongsToRepertoire(
+        selectedRepertoireId,
+        [copiedSong.id!],
+      );
+
+      Navigator.of(context).pop(); // Close loading dialog
+
+      if (repertoireSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('"${_song.title}" ajouté au répertoire avec succès'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Erreur lors de l\'ajout au répertoire'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error adding song to repertoire: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
   /// Capture screenshot and share as image
   Future<void> _captureAndShareImage() async {
     try {
@@ -859,6 +973,62 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
         context,
       ).showSnackBar(SnackBar(content: Text('Erreur lors du partage: $e')));
     }
+  }
+}
+
+/// Repertoire selection dialog
+class _RepertoireSelectionDialog extends StatefulWidget {
+  final List<Repertoire> repertoires;
+
+  const _RepertoireSelectionDialog({required this.repertoires});
+
+  @override
+  State<_RepertoireSelectionDialog> createState() =>
+      _RepertoireSelectionDialogState();
+}
+
+class _RepertoireSelectionDialogState
+    extends State<_RepertoireSelectionDialog> {
+  int? _selectedRepertoireId;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Sélectionner un répertoire'),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: widget.repertoires.length,
+          itemBuilder: (context, index) {
+            final repertoire = widget.repertoires[index];
+            return RadioListTile<int>(
+              title: Text(repertoire.name),
+              subtitle: repertoire.description?.isNotEmpty == true
+                  ? Text(repertoire.description!)
+                  : null,
+              value: repertoire.id!,
+              groupValue: _selectedRepertoireId,
+              onChanged: (value) {
+                setState(() => _selectedRepertoireId = value);
+              },
+            );
+          },
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Annuler'),
+        ),
+        FilledButton(
+          onPressed: _selectedRepertoireId != null
+              ? () => Navigator.of(context).pop(_selectedRepertoireId)
+              : null,
+          child: const Text('Ajouter'),
+        ),
+      ],
+    );
   }
 }
 

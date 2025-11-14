@@ -34,11 +34,15 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
 
   /// Load repertoire data and its songs
   Future<void> _loadRepertoireData() async {
+    print(
+      'DEBUG: _loadRepertoireData called for repertoire ${widget.repertoireId}',
+    );
     try {
       final databaseHelper = DatabaseHelper();
 
       // Load repertoire details
       _repertoire = await databaseHelper.getRepertoireById(widget.repertoireId);
+      print('DEBUG: Loaded repertoire: ${_repertoire?.name}');
 
       // Load songs in repertoire
       final repertoireProvider = Provider.of<RepertoireProvider>(
@@ -46,11 +50,15 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
         listen: false,
       );
       await repertoireProvider.loadSongsInRepertoire(widget.repertoireId);
+      print(
+        'DEBUG: Loaded ${repertoireProvider.currentRepertoireSongs.length} songs in repertoire',
+      );
 
       setState(() {
         _isLoading = false;
       });
     } catch (e) {
+      print('DEBUG: Error in _loadRepertoireData: $e');
       setState(() {
         _isLoading = false;
       });
@@ -74,16 +82,20 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
 
   /// Navigate to add existing songs screen
   void _addExistingSongs() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return _AddSongsToRepertoireSheet(
-          repertoireId: widget.repertoireId,
-          onSongsAdded: _loadRepertoireData,
-        );
-      },
-    );
+    // Force a refresh of repertoire data first
+    _loadRepertoireData().then((_) {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        builder: (context) {
+          return _AddSongsToRepertoireSheet(
+            repertoireId: widget.repertoireId,
+            onSongsAdded: _loadRepertoireData,
+            includeExtractedSongs: true,
+          );
+        },
+      );
+    });
   }
 
   /// Navigate to create new song screen for this repertoire
@@ -264,6 +276,8 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
       builder: (context, repertoireProvider, child) {
         final songs = repertoireProvider.currentRepertoireSongs;
         final filteredSongs = _getFilteredSongs(songs);
+
+        print('DEBUG: Building repertoire content with ${songs.length} songs');
 
         return Column(
           children: [
@@ -612,10 +626,12 @@ class _SongListItem extends StatelessWidget {
 class _AddSongsToRepertoireSheet extends StatefulWidget {
   final int repertoireId;
   final VoidCallback onSongsAdded;
+  final bool includeExtractedSongs;
 
   const _AddSongsToRepertoireSheet({
     required this.repertoireId,
     required this.onSongsAdded,
+    this.includeExtractedSongs = false,
   });
 
   @override
@@ -628,6 +644,79 @@ class _AddSongsToRepertoireSheetState
   final TextEditingController _searchController = TextEditingController();
   final Set<int> _selectedSongIds = {};
   bool _isAdding = false;
+  late SongProvider _songProvider;
+  List<Song> _filteredSongs = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _songProvider = SongProvider();
+    _loadSongs();
+  }
+
+  Future<void> _loadSongs() async {
+    if (widget.includeExtractedSongs) {
+      await _songProvider.loadAllSongsForRepertoire();
+    } else {
+      await _songProvider.loadSongs();
+    }
+
+    // Filter out songs that are already in this repertoire
+    final repertoireProvider = Provider.of<RepertoireProvider>(
+      context,
+      listen: false,
+    );
+    final songsInRepertoire = repertoireProvider.currentRepertoireSongs;
+
+    print('DEBUG: Songs in repertoire: ${songsInRepertoire.length}');
+    songsInRepertoire.forEach((song) {
+      print('DEBUG: Song in repertoire: ${song.title} (ID: ${song.id})');
+    });
+
+    // Get IDs of songs already in repertoire
+    final songsInRepertoireIds = songsInRepertoire
+        .map((song) => song.id)
+        .toSet();
+    print('DEBUG: Songs in repertoire IDs: $songsInRepertoireIds');
+
+    // Filter the song provider's songs to exclude those already in repertoire
+    final filteredSongs = <Song>[];
+    final databaseHelper = DatabaseHelper();
+
+    for (final song in _songProvider.songs) {
+      bool shouldInclude = false;
+
+      if (song.id! < 0) {
+        // For extracted songs (negative IDs), check if they have been copied to main database
+        final existingSong = await databaseHelper.findSongByTitleAndArtist(
+          song.title,
+          song.artist,
+        );
+        shouldInclude = existingSong == null; // Only show if not yet copied
+        print(
+          'DEBUG: Extracted song ${song.title} (ID: ${song.id}) - include: $shouldInclude',
+        );
+      } else {
+        // For regular songs (positive IDs), exclude if already in repertoire
+        shouldInclude = !songsInRepertoireIds.contains(song.id);
+        print(
+          'DEBUG: Regular song ${song.title} (ID: ${song.id}) - include: $shouldInclude',
+        );
+      }
+
+      if (shouldInclude) {
+        filteredSongs.add(song);
+      }
+    }
+
+    print('DEBUG: Filtered songs count: ${filteredSongs.length}');
+
+    // Update the song provider with filtered songs
+    // Since we can't modify the provider directly, we'll store filtered songs locally
+    setState(() {
+      _filteredSongs = filteredSongs;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -662,9 +751,10 @@ class _AddSongsToRepertoireSheetState
 
           // Songs list
           Expanded(
-            child: Consumer<SongProvider>(
-              builder: (context, songProvider, child) {
-                final songs = songProvider.songs;
+            child: ListenableBuilder(
+              listenable: _songProvider,
+              builder: (context, child) {
+                final songs = _filteredSongs;
                 final filteredSongs = _getFilteredSongs(songs);
 
                 return ListView.builder(
@@ -672,6 +762,8 @@ class _AddSongsToRepertoireSheetState
                   itemBuilder: (context, index) {
                     final song = filteredSongs[index];
                     final isSelected = _selectedSongIds.contains(song.id);
+
+                    final isExtractedSong = song.id! < 0;
 
                     return ListTile(
                       leading: Checkbox(
@@ -686,7 +778,35 @@ class _AddSongsToRepertoireSheetState
                           });
                         },
                       ),
-                      title: Text(song.title),
+                      title: Row(
+                        children: [
+                          Expanded(child: Text(song.title)),
+                          if (isExtractedSong) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: Colors.orange.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Text(
+                                'EXTRAIT',
+                                style: AppTextStyles.labelSmall.copyWith(
+                                  color: Colors.orange,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
                       subtitle: Text(song.artist),
                       trailing: song.key.isNotEmpty
                           ? Container(
@@ -821,6 +941,9 @@ class _AddSongsToRepertoireSheetState
 
   /// Add selected songs to repertoire
   Future<void> _addSelectedSongs() async {
+    print(
+      'DEBUG: _addSelectedSongs called with ${_selectedSongIds.length} songs',
+    );
     setState(() {
       _isAdding = true;
     });
@@ -836,13 +959,17 @@ class _AddSongsToRepertoireSheetState
         _selectedSongIds.toList(),
       );
 
+      print('DEBUG: addSongsToRepertoire returned: $success');
+
       if (success) {
+        print('DEBUG: Calling widget.onSongsAdded()');
         widget.onSongsAdded();
         Navigator.of(context).pop();
       } else {
         _showError('Erreur lors de l\'ajout des chansons');
       }
     } catch (e) {
+      print('DEBUG: Exception in _addSelectedSongs: $e');
       _showError('Erreur: $e');
     } finally {
       setState(() {

@@ -538,33 +538,90 @@ class ChordExtractionService {
       '  Beat duration: $beatDuration, beats per measure: $beatsPerMeasure',
     );
 
-    // Pour chaque beat dans la mesure, trouver le chord actif à ce moment
+    // DEBUG: Log all chords in this time range
+    print('  Available chords in measure range:');
+    for (final chordData in chords) {
+      final chordStart = (chordData['start'] as num).toDouble();
+      final chordEnd = (chordData['end'] as num).toDouble();
+      final chordName = chordData['chord'] as String;
+      if (chordStart < measureEnd && chordEnd > measureStart) {
+        print('    Chord: $chordName from $chordStart to $chordEnd');
+      }
+    }
+
+    // IMPROVED METHOD: Quantize chord starts to beat boundaries and assign accordingly
+    // First, collect all chord changes within this measure
+    final chordChanges = <Map<String, dynamic>>[];
+
+    for (final chordData in chords) {
+      final chordStart = (chordData['start'] as num).toDouble();
+      final chordEnd = (chordData['end'] as num).toDouble();
+
+      if (chordStart < measureEnd && chordEnd > measureStart) {
+        // Quantize start time to nearest beat boundary
+        final relativeStart = chordStart - measureStart;
+        final beatIndex = (relativeStart / beatDuration).round();
+        final quantizedStart = measureStart + (beatIndex * beatDuration);
+
+        chordChanges.add({
+          'originalStart': chordStart,
+          'quantizedStart': quantizedStart.clamp(measureStart, measureEnd),
+          'end': chordEnd,
+          'chord': _convertChordFormat(chordData['chord'] as String),
+          'beatIndex': beatIndex.clamp(0, beatsPerMeasure - 1),
+        });
+
+        print(
+          '    Chord change: ${chordData['chord']} at $chordStart -> quantized to beat ${beatIndex} ($quantizedStart)',
+        );
+      }
+    }
+
+    // Sort chord changes by quantized start time
+    chordChanges.sort(
+      (a, b) => (a['quantizedStart'] as double).compareTo(
+        b['quantizedStart'] as double,
+      ),
+    );
+
+    print('    Sorted chord changes: $chordChanges');
+
+    // Assign chords to beats based on quantized positions
+    String currentChord = '';
+    int currentChangeIndex = 0;
+
     for (int beatIdx = 0; beatIdx < beatsPerMeasure; beatIdx++) {
-      // Le temps du milieu de ce beat (pour une meilleure précision)
-      final beatTime =
-          measureStart + (beatIdx * beatDuration) + (beatDuration / 2);
+      final beatStart = measureStart + (beatIdx * beatDuration);
 
-      // Trouver le chord actif au moment de ce beat
-      String? activeChord;
-
-      for (final chordData in chords) {
-        final chordStart = (chordData['start'] as num).toDouble();
-        final chordEnd = (chordData['end'] as num).toDouble();
-
-        // Si ce chord est actif au moment du beat (avec une tolérance)
-        if (chordStart <= beatTime && beatTime < chordEnd) {
-          activeChord = _convertChordFormat(chordData['chord'] as String);
-          print(
-            '    Beat $beatIdx (time=$beatTime): found chord $activeChord (active from $chordStart to $chordEnd)',
-          );
-          break;
-        }
+      // Check if there's a chord change at or before this beat
+      while (currentChangeIndex < chordChanges.length &&
+          (chordChanges[currentChangeIndex]['quantizedStart'] as double) <=
+              beatStart) {
+        currentChord = chordChanges[currentChangeIndex]['chord'] as String;
+        print('    Beat $beatIdx: chord change to $currentChord');
+        currentChangeIndex++;
       }
 
-      if (activeChord != null) {
-        measureChords[beatIdx] = activeChord;
+      // If we have a current chord and it still active at this beat
+      if (currentChord.isNotEmpty) {
+        // Check if the chord is still active (ends after beat start)
+        bool isActive = false;
+        for (final change in chordChanges) {
+          if (change['chord'] == currentChord &&
+              (change['end'] as double) > beatStart) {
+            isActive = true;
+            break;
+          }
+        }
+
+        if (isActive) {
+          measureChords[beatIdx] = currentChord;
+          print('    Assigned: $currentChord to beat $beatIdx');
+        } else {
+          print('    Beat $beatIdx: chord $currentChord no longer active');
+        }
       } else {
-        print('    Beat $beatIdx (time=$beatTime): no chord found');
+        print('    Beat $beatIdx: no chord assigned yet');
       }
     }
 

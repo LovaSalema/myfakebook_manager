@@ -7,7 +7,6 @@ import '../models/section.dart';
 import '../models/measure.dart';
 import '../models/repertoire.dart';
 import '../models/repertoire_song.dart';
-import '../models/export_settings.dart';
 import '../../core/constants/app_constants.dart';
 
 /// Custom database exception with clear error messages
@@ -37,6 +36,8 @@ abstract class BaseDatabaseHelper {
   Future<List<Song>> getRecentSongs(int limit);
   Future<int> toggleFavorite(int id);
   Future<int> transposeSong(int songId, String newKey);
+  Future<Song?> findSongByTitleAndArtist(String title, String artist);
+  Future<int> cleanupDuplicateSongs();
   Future<void> close();
   Future<void> deleteDatabase();
 }
@@ -231,8 +232,10 @@ class DatabaseHelper implements BaseDatabaseHelper {
 
     try {
       return await db.transaction((txn) async {
-        // Insert song
-        final songId = await txn.insert('songs', song.toMap());
+        // Insert song (remove ID to allow auto-generation)
+        final songMap = song.toMap();
+        songMap.remove('id'); // Allow SQLite to generate new ID
+        final songId = await txn.insert('songs', songMap);
 
         // Insert structure if exists
         if (song.structure != null) {
@@ -243,15 +246,17 @@ class DatabaseHelper implements BaseDatabaseHelper {
         // Insert sections and measures
         for (final section in song.sections) {
           final sectionWithSongId = section.copyWith(songId: songId);
-          final sectionId = await txn.insert(
-            'sections',
-            sectionWithSongId.toMap(),
-          );
+          // Create section map without ID to allow auto-generation
+          final sectionMap = sectionWithSongId.toMap();
+          sectionMap.remove('id'); // Remove ID to allow auto-generation
+          final sectionId = await txn.insert('sections', sectionMap);
 
           // Insert measures for this section
           for (final measure in section.measures) {
             final measureWithSectionId = measure.copyWith(sectionId: sectionId);
+            // Create measure map without ID to allow auto-generation
             final measureMap = measureWithSectionId.toMap();
+            measureMap.remove('id'); // Remove ID to allow auto-generation
             await txn.insert('measures', measureMap);
           }
         }
@@ -544,6 +549,130 @@ class DatabaseHelper implements BaseDatabaseHelper {
       throw DatabaseException(
         'Failed to get songs by key',
         operation: 'getSongsByKey',
+        error: e,
+      );
+    }
+  }
+
+  /// Check if a song with the same title and artist already exists
+  Future<Song?> findSongByTitleAndArtist(String title, String artist) async {
+    final db = await database;
+
+    try {
+      final maps = await db.query(
+        'songs',
+        where: 'title = ? AND artist = ?',
+        whereArgs: [title.trim(), artist.trim()],
+        limit: 1,
+      );
+
+      if (maps.isEmpty) return null;
+
+      final song = Song.fromMap(maps.first);
+      final songId = song.id!;
+
+      // Load structure
+      final structureMaps = await db.query(
+        'structures',
+        where: 'song_id = ?',
+        whereArgs: [songId],
+      );
+      Structure? structure;
+      if (structureMaps.isNotEmpty) {
+        structure = Structure.fromMap(structureMaps.first);
+      }
+
+      // Load sections with measures
+      final sections = await _getSectionsForSong(songId);
+
+      // Create complete song
+      return song.copyWith(structure: structure, sections: sections);
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to find song by title and artist',
+        operation: 'findSongByTitleAndArtist',
+        error: e,
+      );
+    }
+  }
+
+  /// Clean up duplicate songs (same title/artist) keeping only the oldest one
+  Future<int> cleanupDuplicateSongs() async {
+    final db = await database;
+
+    try {
+      int totalDeleted = 0;
+
+      // Find all songs grouped by title and artist
+      final duplicateGroups = await db.rawQuery('''
+        SELECT title, artist, COUNT(*) as count, MIN(id) as keep_id
+        FROM songs
+        GROUP BY title, artist
+        HAVING COUNT(*) > 1
+        ORDER BY title, artist
+      ''');
+
+      for (final group in duplicateGroups) {
+        final title = group['title'] as String;
+        final artist = group['artist'] as String;
+        final keepId = group['keep_id'] as int;
+
+        print(
+          'DEBUG: Found duplicates for "$title" by "$artist" - keeping ID: $keepId',
+        );
+
+        // Get all duplicate song IDs (excluding the one to keep)
+        final duplicateMaps = await db.query(
+          'songs',
+          columns: ['id'],
+          where: 'title = ? AND artist = ? AND id != ?',
+          whereArgs: [title, artist, keepId],
+        );
+
+        for (final duplicateMap in duplicateMaps) {
+          final duplicateId = duplicateMap['id'] as int;
+
+          // Check if this duplicate is used in any repertoires
+          final repertoireUsage = await db.query(
+            'repertoire_songs',
+            where: 'song_id = ?',
+            whereArgs: [duplicateId],
+            limit: 1,
+          );
+
+          if (repertoireUsage.isNotEmpty) {
+            // Update repertoire_songs to point to the kept song
+            await db.update(
+              'repertoire_songs',
+              {'song_id': keepId},
+              where: 'song_id = ?',
+              whereArgs: [duplicateId],
+            );
+            print(
+              'DEBUG: Updated repertoire references from ID $duplicateId to $keepId',
+            );
+          }
+
+          // Delete the duplicate song (cascade will handle related data)
+          final deleted = await db.delete(
+            'songs',
+            where: 'id = ?',
+            whereArgs: [duplicateId],
+          );
+
+          if (deleted > 0) {
+            totalDeleted++;
+            print('DEBUG: Deleted duplicate song ID: $duplicateId');
+          }
+        }
+      }
+
+      print('DEBUG: Cleanup completed - deleted $totalDeleted duplicate songs');
+      return totalDeleted;
+    } catch (e) {
+      throw DatabaseException(
+        'Failed to cleanup duplicate songs',
+        operation: 'cleanupDuplicateSongs',
         error: e,
       );
     }
