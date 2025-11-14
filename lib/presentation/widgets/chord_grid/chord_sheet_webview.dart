@@ -28,6 +28,11 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
   // Getter to expose the controller
   ScreenshotController get controller => screenshotController;
 
+  // Method to advance to next page
+  void nextPage() {
+    _controller.runJavaScript('nextPage();');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -42,6 +47,8 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
       final htmlContent = HtmlChordSheetService.generateChordSheetHtml(
         widget.song,
         forExport: widget.forExport,
+        paginate: !widget.forExport,
+        measuresPerPage: 12,
       );
       print(
         'DEBUG: HTML content generated successfully, length: ${htmlContent.length}',
@@ -59,10 +66,19 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
                 _hasError = false;
               });
             },
-            onPageFinished: (String url) {
+            onPageFinished: (String url) async {
               print(
                 'DEBUG: WebView page finished loading: $url (forExport: ${widget.forExport})',
               );
+              // Log the content height
+              try {
+                final height = await _controller.runJavaScriptReturningResult(
+                  'document.body.scrollHeight',
+                );
+                print('DEBUG: WebView content scrollHeight: $height');
+              } catch (e) {
+                print('DEBUG: Error getting scrollHeight: $e');
+              }
               setState(() {
                 _isLoading = false;
               });
@@ -150,7 +166,7 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
               controller: screenshotController,
               child: Container(
                 width: double.infinity, // Full width
-                height: 500,
+                height: 1000,
                 color: Colors.white, // Ensure white background
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -158,7 +174,7 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
                     children: [
                       Container(
                         width: double.infinity,
-                        height: 500,
+                        height: 1000,
                         child: _hasError
                             ? _buildErrorState()
                             : ExcludeSemantics(
@@ -168,7 +184,7 @@ class ChordSheetWebViewState extends State<ChordSheetWebView> {
                       if (_isLoading)
                         Container(
                           width: double.infinity,
-                          height: 500,
+                          height: 1000,
                           color: Colors.white,
                           child: const Center(
                             child: CircularProgressIndicator(),

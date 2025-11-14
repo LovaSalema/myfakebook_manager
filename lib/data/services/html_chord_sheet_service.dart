@@ -5,8 +5,18 @@ import '../../data/models/measure.dart';
 /// Service to generate HTML chord sheet from Song data
 class HtmlChordSheetService {
   /// Generates a complete HTML chord sheet from Song data
-  static String generateChordSheetHtml(Song song, {bool forExport = false}) {
-    final htmlContent = _buildHtmlTemplate(song, forExport: forExport);
+  static String generateChordSheetHtml(
+    Song song, {
+    bool forExport = false,
+    bool paginate = false,
+    int measuresPerPage = 12,
+  }) {
+    final htmlContent = _buildHtmlTemplate(
+      song,
+      forExport: forExport,
+      paginate: paginate,
+      measuresPerPage: measuresPerPage,
+    );
     return htmlContent;
   }
 
@@ -76,10 +86,158 @@ class HtmlChordSheetService {
     }
   }
 
-  static String _buildHtmlTemplate(Song song, {bool forExport = false}) {
+  static String _buildHtmlTemplate(
+    Song song, {
+    bool forExport = false,
+    bool paginate = false,
+    int measuresPerPage = 12,
+  }) {
     final timeSignature = song.timeSignature ?? '4/4';
     final beatsPerMeasure = _getBeatsPerMeasure(timeSignature);
     final gridLayout = _getGridLayout(timeSignature);
+
+    final totalMeasures = song.sections.fold<int>(
+      0,
+      (sum, section) => sum + section.measures.length,
+    );
+    final totalPages = paginate
+        ? ((totalMeasures + measuresPerPage - 1) ~/ measuresPerPage)
+        : 1;
+
+    final paginationHtml = paginate
+        ? '''
+        <div class="pagination">
+          <button onclick="prevPage()" id="prev-btn">&#x2039;</button>
+          <span id="page-info">Page 1 of $totalPages</span>
+          <button onclick="nextPage()" id="next-btn">&#x203A;</button>
+        </div>
+        '''
+        : '';
+
+    // Auto-scroll controls
+    // final autoScrollHtml = '''
+    //     <div class="autoscroll-controls">
+    //       <button onclick="toggleAutoScroll()" id="autoscroll-btn">▶ Auto-scroll</button>
+    //       <label for="speed-slider">Vitesse:</label>
+    //       <input type="range" id="speed-slider" min="1" max="10" value="3" step="0.5" onchange="updateScrollSpeed()">
+    //       <span id="speed-display">3</span>
+    //     </div>
+    // ''';
+
+    final scriptHtml =
+        '''
+    <script>
+    var currentPage = 0;
+    var totalPages = $totalPages;
+    var isAutoScrolling = false;
+    var scrollSpeed = 3;
+    var scrollInterval = null;
+    
+    ${paginate ? '''
+    function showPage(page) {
+      console.log('Showing page: ' + page);
+      for (var i = 0; i < totalPages; i++) {
+        var el = document.getElementById('page-' + i);
+        if (el) el.style.display = i == page ? 'block' : 'none';
+      }
+      var info = document.getElementById('page-info');
+      if (info) info.textContent = 'Page ' + (page + 1) + ' of ' + totalPages;
+      var prev = document.getElementById('prev-btn');
+      if (prev) prev.disabled = page == 0;
+      var next = document.getElementById('next-btn');
+      if (next) next.disabled = page == totalPages - 1;
+    }
+    function nextPage() {
+      if (currentPage < totalPages - 1) {
+        currentPage++;
+        showPage(currentPage);
+      }
+    }
+    function prevPage() {
+      if (currentPage > 0) {
+        currentPage--;
+        showPage(currentPage);
+      }
+    }
+    ''' : ''}
+    
+    function toggleAutoScroll() {
+      isAutoScrolling = !isAutoScrolling;
+      var btn = document.getElementById('autoscroll-btn');
+      
+      if (isAutoScrolling) {
+        btn.textContent = '⏸ Pause';
+        btn.classList.add('active');
+        startAutoScroll();
+      } else {
+        btn.textContent = '▶ Auto-scroll';
+        btn.classList.remove('active');
+        stopAutoScroll();
+      }
+    }
+    
+    function startAutoScroll() {
+      stopAutoScroll(); // Clear any existing interval
+      scrollInterval = setInterval(function() {
+        var container = document.querySelector('.container');
+        var maxScroll = container.scrollHeight - container.clientHeight;
+        
+        if (window.scrollY >= maxScroll) {
+          // Reached bottom, restart
+          window.scrollTo(0, 0);
+        } else {
+          window.scrollBy(0, scrollSpeed);
+        }
+      }, 50); // Update every 50ms
+    }
+    
+    function stopAutoScroll() {
+      if (scrollInterval) {
+        clearInterval(scrollInterval);
+        scrollInterval = null;
+      }
+    }
+    
+    function updateScrollSpeed() {
+      var slider = document.getElementById('speed-slider');
+      var display = document.getElementById('speed-display');
+      scrollSpeed = parseFloat(slider.value);
+      display.textContent = scrollSpeed.toFixed(1);
+      
+      // Restart auto-scroll with new speed if active
+      if (isAutoScrolling) {
+        startAutoScroll();
+      }
+    }
+    
+    // Stop auto-scroll on manual scroll
+    var manualScrollTimer;
+    window.addEventListener('wheel', function() {
+      if (isAutoScrolling) {
+        stopAutoScroll();
+        clearTimeout(manualScrollTimer);
+        manualScrollTimer = setTimeout(function() {
+          if (isAutoScrolling) {
+            startAutoScroll();
+          }
+        }, 2000);
+      }
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        toggleAutoScroll();
+      }
+    });
+    
+    window.onload = function() {
+      ${paginate ? 'showPage(0);' : ''}
+      document.getElementById('speed-display').textContent = scrollSpeed.toFixed(1);
+    };
+    </script>
+    ''';
 
     return '''
 <!DOCTYPE html>
@@ -278,6 +436,117 @@ class HtmlChordSheetService {
             font-size: clamp(14px, 3vw, 18px);
         }
 
+        /* Auto-scroll controls */
+        .autoscroll-controls {
+          position: sticky;
+          top: 0;
+          z-index: 1000;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 15px;
+          padding: 12px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 8px;
+          margin-bottom: 20px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          flex-wrap: wrap;
+        }
+        
+        .autoscroll-controls button {
+          padding: 10px 20px;
+          background-color: white;
+          color: #667eea;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: bold;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        
+        .autoscroll-controls button:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .autoscroll-controls button.active {
+          background-color: #ff6b6b;
+          color: white;
+        }
+        
+        .autoscroll-controls label {
+          color: white;
+          font-weight: bold;
+          font-size: 14px;
+        }
+        
+        .autoscroll-controls input[type="range"] {
+          width: 120px;
+          height: 6px;
+          border-radius: 3px;
+          outline: none;
+          background: rgba(255,255,255,0.3);
+        }
+        
+        .autoscroll-controls input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: white;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .autoscroll-controls input[type="range"]::-moz-range-thumb {
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: white;
+          cursor: pointer;
+          border: none;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .autoscroll-controls span {
+          color: white;
+          font-weight: bold;
+          font-size: 14px;
+          min-width: 30px;
+          text-align: center;
+        }
+
+        /* Pagination */
+        .pagination {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 10px;
+          margin: 20px 0;
+          padding: 10px;
+          background-color: #f8f9fa;
+          border-radius: 8px;
+        }
+        .pagination button {
+          padding: 8px 16px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-size: 24px;
+        }
+        .pagination button:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+        .pagination span {
+          font-size: 14px;
+          font-weight: bold;
+        }
+
         /* Responsive adjustments */
         @media screen and (max-width: 768px) {
             body {
@@ -295,6 +564,20 @@ class HtmlChordSheetService {
             .chord-block {
                 min-height: 50px;
                 padding: 6px;
+            }
+            
+            .autoscroll-controls {
+              padding: 10px;
+              gap: 10px;
+            }
+            
+            .autoscroll-controls button {
+              padding: 8px 16px;
+              font-size: 12px;
+            }
+            
+            .autoscroll-controls input[type="range"] {
+              width: 80px;
             }
         }
         
@@ -328,6 +611,10 @@ class HtmlChordSheetService {
             .footer {
                 margin-top: 20px;
             }
+            
+            .autoscroll-controls {
+              font-size: 12px;
+            }
         }
 
         /* Print styles */
@@ -340,6 +627,10 @@ class HtmlChordSheetService {
             .container {
                 box-shadow: none;
                 padding: 20px;
+            }
+            
+            .autoscroll-controls {
+              display: none;
             }
         }
 
@@ -355,12 +646,20 @@ class HtmlChordSheetService {
                 box-shadow: none !important;
                 padding: 0 !important;
             }
+            
+            .autoscroll-controls {
+              display: none !important;
+            }
         }
         ''' : ''}
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Auto-scroll controls -->
+         <!--  autoScrollHtml -->
+        
+        
         <!-- Header -->
         <div class="header">
             <div class="header-left">
@@ -377,13 +676,17 @@ class HtmlChordSheetService {
             </div>
         </div>
 
-        ${_buildSectionsHtml(song, timeSignature, beatsPerMeasure)}
-        
+        ${_buildSectionsHtml(song, timeSignature, beatsPerMeasure, paginate: paginate, measuresPerPage: measuresPerPage)}
+
+        $paginationHtml
+
         <!-- Footer -->
         <div class="footer">
-            <p>page 1 of 1 | last edited ${song.updatedAt.toLocal().toString().split(' ')[0]}</p>
+          <p>page 1 of 1 | last edited ${song.updatedAt.toLocal().toString().split(' ')[0]}</p>
         </div>
     </div>
+
+    $scriptHtml
 </body>
 </html>
 ''';
@@ -392,18 +695,65 @@ class HtmlChordSheetService {
   static String _buildSectionsHtml(
     Song song,
     String timeSignature,
-    int beatsPerMeasure,
-  ) {
+    int beatsPerMeasure, {
+    bool paginate = false,
+    int measuresPerPage = 12,
+  }) {
     if (song.sections.isEmpty) {
       return '<div class="section"><div class="section-title">No Sections</div></div>';
     }
 
-    final sectionsHtml = StringBuffer();
+    if (!paginate) {
+      final sectionsHtml = StringBuffer();
+      for (final section in song.sections) {
+        sectionsHtml.write(
+          _buildSectionHtml(section, timeSignature, beatsPerMeasure),
+        );
+      }
+      return sectionsHtml.toString();
+    }
 
+    // Paginated
+    final allMeasures = <(Section, Measure, int)>[];
     for (final section in song.sections) {
+      for (var i = 0; i < section.measures.length; i++) {
+        allMeasures.add((section, section.measures[i], i));
+      }
+    }
+
+    final pages = <List<(Section, Measure, int)>>[];
+    for (var i = 0; i < allMeasures.length; i += measuresPerPage) {
+      final end = i + measuresPerPage > allMeasures.length
+          ? allMeasures.length
+          : i + measuresPerPage;
+      pages.add(allMeasures.sublist(i, end));
+    }
+
+    final sectionsHtml = StringBuffer();
+    for (var pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+      final pageMeasures = pages[pageIndex];
       sectionsHtml.write(
-        _buildSectionHtml(section, timeSignature, beatsPerMeasure),
+        '<div class="page" id="page-$pageIndex" style="${pageIndex == 0 ? '' : 'display:none;'}">',
       );
+      // Group by section
+      final sectionMap = <Section, List<Measure>>{};
+      for (final (section, measure, _) in pageMeasures) {
+        sectionMap[section] ??= [];
+        sectionMap[section]!.add(measure);
+      }
+      for (final entry in sectionMap.entries) {
+        final section = entry.key;
+        final measures = entry.value;
+        sectionsHtml.write(
+          _buildSectionHtmlFromMeasures(
+            section,
+            measures,
+            timeSignature,
+            beatsPerMeasure,
+          ),
+        );
+      }
+      sectionsHtml.write('</div>');
     }
 
     return sectionsHtml.toString();
@@ -431,6 +781,64 @@ class HtmlChordSheetService {
     sectionHtml.write('<div class="section-group">');
 
     for (final measure in section.measures) {
+      // Get all non-empty chords
+      final validChords = measure.chords
+          .where((chord) => chord.isNotEmpty)
+          .toList();
+
+      // Build chord block with time signature attribute
+      sectionHtml.write(
+        '<div class="chord-block" data-time-sig="$timeSignature">',
+      );
+
+      // Fill up to beatsPerMeasure positions
+      for (int i = 0; i < beatsPerMeasure; i++) {
+        if (i < validChords.length) {
+          sectionHtml.write('<div class="chord">${validChords[i]}</div>');
+        } else {
+          // Empty cell if less than beatsPerMeasure chords
+          sectionHtml.write('<div class="chord"></div>');
+        }
+      }
+
+      sectionHtml.write('</div>');
+    }
+
+    sectionHtml.write('</div>');
+
+    // Repeat marks
+    if (section.hasRepeatSign) {
+      sectionHtml.write('<div class="repeat-open"></div>');
+    }
+
+    sectionHtml.write('</div>');
+
+    return sectionHtml.toString();
+  }
+
+  static String _buildSectionHtmlFromMeasures(
+    Section section,
+    List<Measure> measures,
+    String timeSignature,
+    int beatsPerMeasure,
+  ) {
+    final sectionHtml = StringBuffer();
+
+    sectionHtml.write('<div class="section">');
+
+    // Section header
+    if (section.sectionType == 'CODA') {
+      sectionHtml.write('<div class="coda-symbol">𝄌</div>');
+    }
+
+    sectionHtml.write(
+      '<div class="section-title">${section.displayName}</div>',
+    );
+
+    // Section content
+    sectionHtml.write('<div class="section-group">');
+
+    for (final measure in measures) {
       // Get all non-empty chords
       final validChords = measure.chords
           .where((chord) => chord.isNotEmpty)

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'dart:async';
 import '../../data/models/song.dart';
 import '../providers/extraction_song_provider.dart';
 import '../providers/theme_provider.dart';
@@ -35,6 +36,7 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
       GlobalKey<ChordSheetWebViewState>();
   final MetronomeService _metronomeService = MetronomeService();
   bool _isMetronomePlaying = false;
+  Timer? _pageAdvanceTimer;
 
   @override
   void initState() {
@@ -45,6 +47,7 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
   @override
   void dispose() {
     _metronomeService.dispose();
+    _pageAdvanceTimer?.cancel();
     super.dispose();
   }
 
@@ -57,8 +60,12 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
       ).getSongById(widget.songId);
       print('DEBUG: ExtractionSongProvider returned: $song');
       if (song != null) {
+        final totalMeasures = song.sections.fold<int>(
+          0,
+          (sum, section) => sum + section.measures.length,
+        );
         print(
-          'DEBUG: Extracted song loaded successfully - Title: ${song.title}, Sections: ${song.sections.length}',
+          'DEBUG: Extracted song loaded successfully - Title: ${song.title}, Sections: ${song.sections.length}, Total Measures: $totalMeasures',
         );
         setState(() {
           _song = song;
@@ -604,6 +611,27 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
     }
   }
 
+  int _getBeatsPerMeasure(String timeSignature) {
+    switch (timeSignature) {
+      case '4/4':
+        return 4;
+      case '3/4':
+        return 3;
+      case '2/4':
+        return 2;
+      case '6/8':
+        return 6;
+      case '12/8':
+        return 12;
+      case '5/4':
+        return 5;
+      case '7/8':
+        return 7;
+      default:
+        return 4; // Default to 4/4
+    }
+  }
+
   void _toggleMetronome() async {
     if (_song.tempo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -617,9 +645,20 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
 
     if (_isMetronomePlaying) {
       _metronomeService.stop();
+      _pageAdvanceTimer?.cancel();
+      _pageAdvanceTimer = null;
       setState(() => _isMetronomePlaying = false);
     } else {
       await _metronomeService.start(_song.tempo!);
+      // Start page advance timer
+      final timeSignature = _song.timeSignature ?? '4/4';
+      final beatsPerMeasure = _getBeatsPerMeasure(timeSignature);
+      final timePerMeasure = (60.0 / _song.tempo!) * beatsPerMeasure;
+      final timePerPage = timePerMeasure * 12; // measuresPerPage
+      _pageAdvanceTimer = Timer.periodic(
+        Duration(milliseconds: (timePerPage * 1000).toInt()),
+        (_) => _webViewKey.currentState?.nextPage(),
+      );
       setState(() => _isMetronomePlaying = true);
     }
   }
