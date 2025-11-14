@@ -151,6 +151,10 @@ class AppConstants {
   static const String supportEmail = 'support@myfakebook.com';
   static const String websiteUrl = 'https://myfakebook.com';
 
+  // API Keys
+  static const String cloudConvertApiKey =
+      'VOTRE_CLE_API'; // Replace with actual API key
+
   // Helper methods
   static double getResponsiveSpacing(double baseSpacing) {
     return baseSpacing;

@@ -83,6 +83,10 @@ dependencies:
   # HTTP client for API calls
   http: ^1.2.0
 
+  # YouTube video download and processing
+  youtube_explode_dart: ^2.2.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
