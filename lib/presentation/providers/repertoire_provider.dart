@@ -274,14 +274,23 @@ class RepertoireProvider with ChangeNotifier {
     _clearError();
 
     try {
+      print(
+        'DEBUG: removeSongFromRepertoire called for repertoire $repertoireId, song $songId',
+      );
       final result = await _databaseHelper.removeSongFromRepertoire(
         repertoireId,
         songId,
       );
+      print('DEBUG: removeSongFromRepertoire DB result: $result');
       if (result > 0) {
         // Remove from local state if this is the selected repertoire
         if (_selectedRepertoire?.id == repertoireId) {
+          final beforeCount = _repertoireSongs.length;
           _repertoireSongs.removeWhere((song) => song.id == songId);
+          final afterCount = _repertoireSongs.length;
+          print(
+            'DEBUG: Removed from local state: $beforeCount -> $afterCount songs',
+          );
           notifyListeners();
         }
         return true;

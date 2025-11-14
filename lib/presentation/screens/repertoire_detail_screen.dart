@@ -53,6 +53,11 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
       print(
         'DEBUG: Loaded ${repertoireProvider.currentRepertoireSongs.length} songs in repertoire',
       );
+      repertoireProvider.currentRepertoireSongs.forEach((song) {
+        print(
+          'DEBUG: Song in repertoire after load: ${song.title} (ID: ${song.id})',
+        );
+      });
 
       setState(() {
         _isLoading = false;
@@ -159,6 +164,9 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
 
   /// Remove song from repertoire
   Future<void> _removeSongFromRepertoire(int songId) async {
+    print(
+      'DEBUG: _removeSongFromRepertoire called for songId: $songId in repertoire ${widget.repertoireId}',
+    );
     try {
       final repertoireProvider = Provider.of<RepertoireProvider>(
         context,
@@ -170,6 +178,7 @@ class _RepertoireDetailScreenState extends State<RepertoireDetailScreen> {
         songId,
       );
 
+      print('DEBUG: removeSongFromRepertoire success: $success');
       if (success) {
         _showSuccess('Chanson retirée du répertoire');
         _loadRepertoireData();
@@ -687,12 +696,8 @@ class _AddSongsToRepertoireSheetState
       bool shouldInclude = false;
 
       if (song.id! < 0) {
-        // For extracted songs (negative IDs), check if they have been copied to main database
-        final existingSong = await databaseHelper.findSongByTitleAndArtist(
-          song.title,
-          song.artist,
-        );
-        shouldInclude = existingSong == null; // Only show if not yet copied
+        // Always include extracted songs, they can be added to multiple repertoires
+        shouldInclude = true;
         print(
           'DEBUG: Extracted song ${song.title} (ID: ${song.id}) - include: $shouldInclude',
         );

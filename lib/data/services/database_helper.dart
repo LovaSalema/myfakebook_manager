@@ -930,11 +930,33 @@ class DatabaseHelper implements BaseDatabaseHelper {
     final db = await database;
 
     try {
-      return await db.delete(
+      print(
+        'DEBUG: DB removeSongFromRepertoire - repertoire: $repertoireId, song: $songId',
+      );
+      // Check current entries before delete
+      final beforeMaps = await db.query(
         'repertoire_songs',
         where: 'repertoire_id = ? AND song_id = ?',
         whereArgs: [repertoireId, songId],
       );
+      print('DEBUG: Entries before delete: ${beforeMaps.length}');
+
+      final result = await db.delete(
+        'repertoire_songs',
+        where: 'repertoire_id = ? AND song_id = ?',
+        whereArgs: [repertoireId, songId],
+      );
+      print('DEBUG: DB delete result: $result rows affected');
+
+      // Check after delete
+      final afterMaps = await db.query(
+        'repertoire_songs',
+        where: 'repertoire_id = ? AND song_id = ?',
+        whereArgs: [repertoireId, songId],
+      );
+      print('DEBUG: Entries after delete: ${afterMaps.length}');
+
+      return result;
     } catch (e) {
       throw DatabaseException(
         'Failed to remove song from repertoire',
@@ -1001,11 +1023,16 @@ class DatabaseHelper implements BaseDatabaseHelper {
         [repertoireId],
       );
 
+      print(
+        'DEBUG: getSongsInRepertoire raw query returned ${maps.length} maps for repertoire $repertoireId',
+      );
+
       // Load complete song data with sections and measures
       final songs = <Song>[];
       for (final map in maps) {
         final song = Song.fromMap(map);
         final songId = song.id!;
+        print('DEBUG: Processing song: ${song.title} (ID: $songId)');
 
         // Load structure
         final structureMaps = await db.query(
@@ -1028,6 +1055,13 @@ class DatabaseHelper implements BaseDatabaseHelper {
         );
         songs.add(completeSong);
       }
+
+      print('DEBUG: getSongsInRepertoire returning ${songs.length} songs');
+      songs.forEach((song) {
+        print(
+          'DEBUG: Final song: ${song.title} by ${song.artist} (ID: ${song.id})',
+        );
+      });
 
       return songs;
     } catch (e) {

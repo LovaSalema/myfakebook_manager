@@ -484,19 +484,19 @@ class _ExtractedSongDetailScreenState extends State<ExtractedSongDetailScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.playlist_add, size: 20),
-              label: const Text('Ajouter au répertoire'),
-              onPressed: _addToRepertoire,
-              style: FilledButton.styleFrom(
-                backgroundColor: primaryColor,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ),
+          // SizedBox(
+          //   width: double.infinity,
+          //   child: FilledButton.icon(
+          //     icon: const Icon(Icons.playlist_add, size: 20),
+          //     label: const Text('Ajouter au répertoire'),
+          //     onPressed: _addToRepertoire,
+          //     style: FilledButton.styleFrom(
+          //       backgroundColor: primaryColor,
+          //       foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          //       padding: const EdgeInsets.symmetric(vertical: 12),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
